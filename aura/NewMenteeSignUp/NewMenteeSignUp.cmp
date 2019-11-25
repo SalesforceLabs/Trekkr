@@ -1,0 +1,140 @@
+<!-- New Mentee sign up component for assigning manager, mentor and onboarding details -->
+<aura:component controller="NewMenteeSignUpCntr" implements="force:appHostable,flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" >
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:attribute name="user" type="User" default="{'sObjectType':'User'}"/>
+    <aura:attribute name="sendWelcomeEmail" type="Boolean" default="true"/>
+    <aura:attribute name="onboardingEndDate" type="Date" />
+    <aura:attribute name="joiningDate" type="Date" />
+    <aura:attribute name="newJoineeCustomLookupCount" type="Integer" default="0" />
+    <aura:attribute name="managerCustomLookupCount" type="Integer" default="0"/>
+    <aura:attribute name="mentorCustomLookupCount" type="Integer" default="0"/>
+    <aura:attribute name="userRoleCustomLookupCount" type="Integer" default="0"/>
+    <aura:attribute name="newJoineeCustomLookup" type="List" />
+    <aura:attribute name="managerCustomLookup" type="List"/>
+    <aura:attribute name="mentorCustomLookup" type="List"/>
+    <aura:attribute name="userRoleCustomLookup" type="List"/>
+    <aura:attribute name="showConfirmationDialog" type="Boolean" default="false"/>
+    <aura:attribute name="ConfirmationDialogMessage" type="String"/>
+    <aura:handler name="oSelectedRecordEvent" event="c:selectedsObjectRecordEvent" action="{!c.handleComponentEvent}"/>
+    <aura:handler name="oUnSelectRecordEvent" event="c:unSelectObjectRecordEvent" action="{!c.onClearLookupRecord}"/>
+    <aura:handler name="change" value="{!v.onboardingEndDate}" action="{!c.onChangeEndDate}"/>
+    <aura:handler name="change" value="{!v.joiningDate}" action="{!c.onChangeJoiningDate}"/>
+    <aura:attribute name="minDate" type="String" default=""/>
+    <aura:attribute name="selectedUserRole" type="String"/>
+
+    
+    <div class="slds-card" style="padding:10px;">
+        <div class="slds-form slds-form_stacked">
+            <div class="slds-form-element">
+                <div class="slds-form__row">
+                    <div class="slds-form__item" role="listitem">
+                        <abbr class="slds-required" title="required">*</abbr>
+                        <div class="slds-form-element slds-form-element_stacked slds-hint-parent">
+                            <div class="slds-form-element__control">
+                                <div class="slds-form-element__static">
+                                    {!v.newJoineeCustomLookup}
+                                    Haven't created the New Explorer User?
+                                    <a href="/lightning/setup/ManageUsers/page?address=%2F005%2Fe" target="_blank">Create new User</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-form__item" role="listitem">
+                        <abbr class="slds-required" title="required">*</abbr>
+                        <div class="slds-form-element slds-form-element_stacked slds-hint-parent">
+                            <div class="slds-form-element__control">
+                                <div class="slds-form-element__static">
+                                    {!v.userRoleCustomLookup}
+                                    Haven't created User Role ?
+                                    <a onclick="{!c.onClickNewUserRole}" target="_blank">Create new User Role</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-form__row">
+                    <div class="slds-form__item" role="listitem">
+                        <abbr class="slds-required" title="required">*</abbr>
+                        <div class="slds-form-element slds-form-element_stacked slds-hint-parent">
+                            <div class="slds-form-element__control">
+                                <div class="slds-form-element__static">
+                                    {!v.managerCustomLookup}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-form__item" role="listitem">
+                        <abbr class="slds-required" title="required">*</abbr>
+                        <div class="slds-form-element slds-form-element_stacked slds-hint-parent">
+                            <div class="slds-form-element__control">
+                                <div class="slds-form-element__static">
+                                    {!v.mentorCustomLookup}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-form__row">
+                    <div class="slds-form__item" role="listitem">
+                        <abbr class="slds-required" title="required">*</abbr>
+                        <div class="slds-form-element slds-form-element_stacked slds-hint-parent">
+                            <div class="slds-form-element__control">
+                                <div class="slds-form-element__static">
+                                    <label class="slds-form-element__label">Onboarding Start Date</label> 
+                                    <lightning:input type="date" aura:id="joiningDate" label="" class="field date_submit" value="{!v.joiningDate}" min="{!v.minDate}"/>
+                                    <!--<ui:inputDate aura:id="joiningDate" label="" class="field" value="{!v.joiningDate}" displayDatePicker="true" min="{!v.minDate}"/>-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-form__item" role="listitem">
+                        <abbr class="slds-required" title="required">*</abbr>
+                        <div class="slds-form-element slds-form-element_stacked slds-hint-parent">
+                            <div class="slds-form-element__control">
+                                <div class="slds-form-element__static">
+                                    <label class="slds-form-element__label">Onboarding End Date</label> 
+                                    <lightning:input type="date" aura:id="onboardingEndDate" label="" class="field date_submit" value="{!v.onboardingEndDate}" min="{!v.minDate}"/>
+                                    <!--<ui:inputDate aura:id="onboardingEndDate" updateOn ="change" label="" class="field" value="{!v.onboardingEndDate}" displayDatePicker="true" />-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="slds-form__row">
+                    <div class="slds-form__item" role="listitem">
+                        <div class="slds-form-element slds-form-element_stacked slds-hint-parent">
+                            <div class="slds-form-element__control">
+                                <div class="slds-form-element__static">
+                                    <ui:inputCheckbox label="Send welcome email to Explorer" value="{!v.sendWelcomeEmail}"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-form__item" role="listitem">
+                        <div class="slds-form-element slds-form-element_stacked slds-hint-parent">
+                            <div class="slds-form-element__control">
+                                <div class="slds-form-element__static">
+                                   
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="slds-form-element slds-m-top_x-large" >
+                <div class="slds-form-element__control" style="text-align:center;width:100%">
+                    <lightning:button aura:id="submitBtn" disabled="true" variant="brand" label="Enroll" title="Enroll" onclick="{! c.onClickSave }" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <aura:if isTrue="{!v.showConfirmationDialog}">
+        <c:ConfirmationDialog 
+                              messageBody="{!v.ConfirmationDialogMessage}"
+                              onClickCancel="{!c.onClickCancel_ConfirmationDialog}"
+                              onClickConfirm="{!c.onClickConfirm_ConfirmationDialog}"/>
+    </aura:if>
+    <lightning:spinner alternativeText="Loading" aura:id="ltngSpiner" size="medium" class="slds-hide"/>
+</aura:component>

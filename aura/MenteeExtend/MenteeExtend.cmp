@@ -1,0 +1,93 @@
+<aura:component implements="flexipage:availableForRecordHome,force:hasRecordId,flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes"  controller="ExtendMenteeCntr" access="global" >
+    
+    <aura:attribute name="menteeUsers" type="List"/>
+    <aura:attribute name="selectedMentee" type="User"/>
+    <aura:attribute name="selectedMenteeOnboardingDate" type="Date"/>
+    <aura:attribute name="extendReason" type="String"/>
+    <aura:attribute name="showExtendModal" type="Boolean" default="false"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="strike_evt_modalPrimaryButtonClicked" event="c:strike_evt" action="{!c.onClickModalPrimaryButton}"/>
+    <aura:attribute name="minDate" type="String" />
+    
+    <lightning:card variant="Narrow" title="Close or Extend Onboarding" iconName="standard:customers">
+        <p class="slds-p-horizontal_small slds-box_x-small slds-m-around_small">
+            <aura:if isTrue="{!v.menteeUsers.length>0}">
+                <aura:iteration items="{!v.menteeUsers}" var="user" indexVar="index">
+                    <div class="profile_extend">
+                        <div class="slds-grid">
+                            <div class="slds-p-around_x-small">
+                                <lightning:layoutItem flexibility="auto,no-grow" >
+                                    <aura:if isTrue="{!and(user.FullPhotoUrl!=null,user.FullPhotoUrl!='')}">
+                                        <img src="{!user.FullPhotoUrl}" class="smallCircle" />
+                                        <aura:set attribute="else">
+                                            <img src="{!$Resource.lightning_blue_profile_avatar}" class="smallCircle" />
+                                        </aura:set>
+                                    </aura:if>
+                                </lightning:layoutItem>
+                            </div>
+                            <div class="slds-p-around_x-small">
+                                <lightning:layoutItem flexibility="auto">
+                                    <div class="profile_name">
+                                        {!user.userDetail.FirstName+' '+user.userDetail.LastName}
+                                        <div class="profile_designation">
+                                            <aura:iteration items="{!user.userDetail.User_User_Role_Junctions__r}" var="userRoleJunction">
+                                                <div class="slds-text-body_regular" style="margin-bottom:10px;">{!userRoleJunction.User_Role__r.Name}</div>
+                                            </aura:iteration>
+                                        </div>
+                                    </div>
+                                </lightning:layoutItem>
+                            </div>
+                            <div class="slds-p-around_x-small slds-float_right">
+                                <lightning:layoutItem flexibility="auto, no-grow">
+                                    <div class="profile_designation  slds-p-left_x-large">
+                                        <aura:if isTrue="{!user.daysLeft>2}">
+                                            {!user.daysLeft+' days left'}
+                                            <aura:set attribute="else">
+                                                {!user.daysLeft+' day left'}
+                                            </aura:set>
+                                        </aura:if>
+                                    </div>
+                                </lightning:layoutItem>
+                            </div>
+                        </div>
+                        
+                        <div class="slds-grid slds-border_top">
+                            <div class="slds-col slds-align_absolute-center slds-border_right">
+                                <lightning:layoutItem flexibility="auto, no-grow" >
+                                    <button id="{!index}" class="slds-button" onclick="{!c.onClickExtend}">Extend Onboarding</button>
+                                </lightning:layoutItem>
+                            </div>
+                            <div class="slds-col slds-align_absolute-center">
+                                <lightning:layoutItem flexibility="auto,no-grow">
+                                    <button id="{!index}" class="slds-button" onclick="{!c.onClickClose}">Mark as Complete</button>
+                                </lightning:layoutItem>
+                            </div>
+                        </div>
+                    </div>
+                </aura:iteration>
+                <aura:set attribute="else">
+                    <div class="emptyResult slds-illustration slds-illustration_large forceChatterEmptyFeed">
+                        <img src="{!$Resource.open_road}" style="width:100%;height:300px;" class="slds-m-top_large slds-illustration__svg"/>
+                        <h3 class="slds-text-heading_medium">No Due</h3>
+                        <p class="slds-text-body_regular" style="margin-bottom:1rem">No explorer onboarding is due</p>
+                    </div>
+                </aura:set>
+            </aura:if>
+        </p>
+    </lightning:card>
+    <c:strike_modal
+                    aura:id="extendModal"
+                    title="Extend Onboarding"
+                    primaryButtonLabel="Extend"
+                    secondaryButtonLabel="Cancel"
+                    showHeader="true"
+                    showFooter="true"
+                    showClose="true"
+                    showModal="{!v.showExtendModal}">
+        <div style="width:100%;text-align:left;">
+            <!--<lightning:input type="date" label="Due Date" class="field" value="{!v.selectedMentee.On_boarding_End_Date__c}" min="{!v.minDate}"/>-->
+            <ui:inputDate change="{!c.onChangeDate}" label="Due Date" class="field" value="{!v.selectedMentee.On_boarding_End_Date__c}" displayDatePicker="true" />
+            <lightning:textarea value="{!v.extendReason}" label="Reason for Extend" />
+        </div>
+    </c:strike_modal>
+</aura:component>

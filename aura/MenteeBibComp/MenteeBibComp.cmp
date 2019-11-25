@@ -1,0 +1,138 @@
+<!-- Component to show details about the mentor of logged in mentee user -->
+<aura:component controller="MenteeBibCompCntr" implements="flexipage:availableForAllPageTypes,force:appHostable,forceCommunity:availableForAllPageTypes" access="global"> 
+    <aura:attribute name="mentee" type="User"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <article class="slds-card">
+        <div class="slds-card__header slds-grid">
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__figure">
+                    <lightning:icon iconName="standard:user" alternativeText="User" />
+                </div>
+                <div class="slds-media__body">
+                    <h2 class="slds-card__header-title">
+                        <a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="My Bib">
+                            <span>My Bib</span>
+                        </a>
+                    </h2>
+                </div>
+            </header>
+        </div>
+        <div class="slds-card__body slds-card__body_inner">
+            <div class="profile_details slds-m-bottom_x-small">
+                <div class="profile_pic">
+                    <aura:if isTrue="{!and(v.mentee.FullPhotoUrl!=null,v.selectedMentee.FullPhotoUrl!='')}">
+                        <img src="{!v.mentee.FullPhotoUrl}" class="smallCircle" />
+                        <aura:set attribute="else">
+                            <img src="{!$Resource.lightning_blue_profile_avatar}" class="smallCircle" />
+                        </aura:set>
+                    </aura:if>
+                </div>
+                <div class="profile_name">
+                    {!v.mentee.FirstName+' '+v.mentee.LastName}
+                    <div class="profile_designation">
+                        <aura:iteration items="{!v.mentee.User_User_Role_Junctions__r}" var="userRoleJunction">
+                            <div class="slds-text-body_regular" style="margin-bottom:10px;">{!userRoleJunction.User_Role__r.Name}</div>
+                        </aura:iteration>
+                    </div>
+                </div>
+                <div style="float:right">
+                    
+                    <c:MenteeEarnings noOfEnergizers="{!v.mentee.Energizers__c}" 
+                                      energizersBorder = "border-right: 1px solid #dddbda"
+                                      medalsBorder=""
+                                      noOfMedals="{!v.mentee.Medals__c}"/>
+                </div>
+            </div>
+            <div class="slds-clearfix slds-border_top slds-m-bottom_x-small" style="height:70px">
+                <div class="slds-float_left slds-align_absolute-center" style="height:100%;">
+                    <div class="profile_name">
+                        Guide
+                        <div class="profile_designation">
+                            <a href="{!'/lightning/r/User/'+v.mentee.Mentor__c+'/view'}">
+                                {!v.mentee.Mentor__r.FirstName+' '+v.mentee.Mentor__r.LastName}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-float_right slds-align_absolute-center" style="height:100%;">
+                    <aura:if isTrue="{!and(v.mentee.Mentor__r.MobilePhone != null,v.mentee.Mentor__r.MobilePhone != '')}">
+                        <lightning:icon iconName="action:call" alternativeText="Call" size="x-small" class="slds-m-around_x-small clickCursor" onclick="{! c.onClickCall }"/>
+                    </aura:if>
+                    <aura:if isTrue="{!and(v.mentee.Mentor__r.Email != null,v.mentee.Mentor__r.Email != '')}">
+                        <lightning:icon iconName="action:email" alternativeText="Email" size="x-small" class="slds-m-around_x-small clickCursor" onclick="{! c.onClickEmail }"/>
+                    </aura:if>
+                </div>
+            </div>
+            <div class="slds-clearfix slds-border_top slds-m-bottom_x-small" style="height:100px">
+                <div class="slds-float_left slds-align_absolute-center" style="height:100%;width:90%">
+                    <div class="profile_name" style="display:block !important;width:100%">
+                        Vision
+                        <lightning:helptext content="What you want to do or achieve as an Explorer."/>
+                        <div class="profile_designation" style="height:60px;overflow-y:scroll;">
+                            <aura:if isTrue="{!and(v.mentee.Vision__c != '',v.mentee.Vision__c!=null)}">
+                                <ui:outputText value="{!v.mentee.Vision__c}"/>
+                                <aura:set attribute="else">
+                                    Add your Vision
+                                </aura:set>
+                            </aura:if>
+                            <section aura:id="visionEditSection"  tabindex="0" class="slds-popover slds-popover_edit slds-hide" role="dialog" style="position: absolute; top: 0px;width:100%;overflow-y:scroll;">
+                                <div class="slds-popover__body" style="padding: .25rem .25rem .25rem .25rem;">
+                                    <div class="slds-form-element slds-grid slds-wrap">
+                                        <div class="slds-form-element__control slds-grow">
+                                            <ui:inputTextArea class="slds-input inputFieldWidth"
+                                                              labelClass="slds-form-element__label slds-form-element__label_edit slds-no-flex"
+                                                              blur="{!c.hideVisionEditSection}"
+                                                              label="Values"
+                                                              value="{!v.mentee.Vision__c}" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <span id="form-end" tabindex="0"></span>
+                            </section> 
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-float_right slds-align_absolute-center" style="height:100%;width:10%;">
+                    <lightning:icon iconName="utility:edit" alternativeText="Edit" size="x-small" class="slds-m-around_x-small clickCursor" onclick="{!c.showVisionEditSection}"/>
+                </div>
+            </div>
+            <div class="slds-clearfix slds-border_top slds-m-bottom_x-small" style="height:100px">
+                <div class="slds-float_left slds-align_absolute-center" style="height:100%;width:90%">
+                    <div class="profile_name" style="display:block !important;width:100%">
+                        Values
+                        <lightning:helptext content="Principles and beliefs that help you pursue the vision"/>
+                        <div class="profile_designation" style="height:60px;overflow-y:scroll;">
+                            <aura:if isTrue="{!and(v.mentee.Values__c != '',v.mentee.Values__c!=null)}">
+                                <ui:outputText value="{!v.mentee.Values__c}"/>
+                                <aura:set attribute="else">
+                                    Add your Values
+                                </aura:set>
+                            </aura:if>
+                            <section aura:id="valueEditSection"  tabindex="0" class="slds-popover slds-popover_edit slds-hide scroll" role="dialog" style="position: absolute; top: 0px;width:100%;verflow-y:scroll;">
+                                <div class="slds-popover__body" style="padding: .25rem .25rem .25rem .25rem;">
+                                    <div class="slds-form-element slds-grid slds-wrap">
+                                        <div class="slds-form-element__control slds-grow">
+                                            <ui:inputTextArea class="slds-input inputFieldWidth"
+                                                              labelClass="slds-form-element__label slds-form-element__label_edit slds-no-flex"
+                                                              blur="{!c.hideValueEditSection}"
+                                                              label="Values"
+                                                              value="{!v.mentee.Values__c}" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <span id="form-end" tabindex="0"></span>
+                            </section>  
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-float_right slds-align_absolute-center" style="height:100%;width:10%">
+                    <lightning:icon iconName="utility:edit" alternativeText="Edit" size="x-small" class="slds-m-around_x-small clickCursor" onclick="{!c.showValueEditSection}"/>
+                </div>
+            </div>
+            <div class="slds-border_top slds-m-bottom_x-small slds-hide" aura:id="saveBtnDiv" style="padding:15px;text-align:right;">
+                <lightning:button variant="success" label="Save" title="Save" onclick="{! c.onClickSave }"/>
+            </div>
+        </div>
+    </article>
+</aura:component>

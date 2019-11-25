@@ -1,0 +1,25 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global">
+
+    <aura:attribute name="onClickClose" type="Aura.Action" required="true"/>
+    <aura:attribute name="alertType" type="String" required="true"/>
+    <aura:attribute name="message" type="String" required="true"/>
+    <aura:attribute name="parentClass" type="String" access="private"/>
+    <aura:attribute name="iconName" type="String" access="private"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <div class="{!v.parentClass}" role="alert">
+        <span class="slds-assistive-text">error</span>
+        <span class="slds-icon_container slds-icon-utility-error slds-m-right_x-small">
+            <lightning:icon size="x-small" iconName="{!v.iconName}" alternativeText="{!v.alertType}" variant="inverse"/>
+        </span>
+        <h2>
+            <aura:unescapedHtml value="{!v.message}"/>
+        </h2>
+        <div class="slds-notify__close">
+            <button class="slds-button slds-button_icon slds-button_icon-small slds-button_icon-inverse" onclick="{!v.onClickClose}" title="Close">
+                X
+                <span class="slds-assistive-text">Close</span>
+            </button>
+        </div>
+    </div>
+</aura:component>

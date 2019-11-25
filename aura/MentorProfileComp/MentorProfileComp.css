@@ -1,0 +1,32 @@
+.THIS .circle { 
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border:1px solid #dddbda;
+}
+.THIS .smallCircle { 
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    border:1px solid #dddbda;
+}
+.THIS .introjs-helperLayer {
+    box-sizing: content-box;
+    position: absolute;
+    z-index: 9999998;
+    background-color: #FFF;
+    background-color: rgba(255,255,255,.9);
+    border: 1px solid #777;
+    border: 1px solid rgba(0,0,0,.5);
+    border-radius: 4px;
+    box-shadow: 0 2px 15px rgba(0,0,0,.4);
+    -webkit-transition: all 0.3s ease-out;
+    -moz-transition: all 0.3s ease-out;
+    -ms-transition: all 0.3s ease-out;
+    -o-transition: all 0.3s ease-out;
+    transition: all 0.3s ease-out;
+    opacity: 0.4 !important;
+    filter: alpha(opacity=50) !important;
+}

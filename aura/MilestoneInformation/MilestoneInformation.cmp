@@ -1,0 +1,530 @@
+<aura:component access="global" implements="forceCommunity:availableForAllPageTypes" controller="MilestoneInformationCntr">
+    
+    <aura:attribute name="milestoneDetails" type="List"/>
+    <aura:attribute name="selectedTab" type="String"/>
+    <aura:attribute name="selectedMilestoneName" type="String"/>
+    <aura:attribute name="milestonePrograms" type="List"/>
+    <aura:attribute name="showSideView" type="Boolean" default="true"/>
+    <aura:attribute name="showFeedbackModal" type="Boolean" default="false"/>
+    <aura:attribute name="showReopenModal" type="Boolean" default="false"/>
+    <aura:attribute name="reopenReason" type="String"/>
+    <aura:attribute name="reopenTaskId" type="String"/>
+    <aura:attribute name="reopenTaskIndex" type="String"/>
+    <aura:attribute name="selectedTaskAttachments" type="List"/>
+    <aura:attribute name="assignedTaskContributions" type="List"/>
+    <aura:attribute name="newTaskContribution" type="Boolean" default="false"/>
+    <aura:attribute name="editTaskDetail" type="Object"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:attribute name="selectedIdForMoreInformation" type="String" />
+    <aura:attribute name="selectedProgram" type="Object"/>
+    <aura:attribute name="onStepReopen" type="Aura.Action"/>
+    <aura:attribute name="showEditModal" type="Boolean" />
+    <aura:attribute name="statuses" type="List" />
+    <aura:attribute name="persona" type="String" default="MENTOR"/>
+    <aura:attribute name="isNotification" type="Boolean" default="false"/>
+    <aura:attribute name="countdownCompCount" type="Integer" default="0"/>
+    <aura:attribute name="isEditableForUser" type="Boolean" default="true"/>
+    <aura:attribute name="countdownComp" type="List" default="[]"/>
+    <aura:attribute name="minDateTime" type="String" />
+    <aura:attribute name="onDataChange" type="Aura.Action"/>
+    <aura:handler name="strike_evt_modalPrimaryButtonClicked" event="c:strike_evt" action="{!c.onClickModalPrimaryButton}"/>
+    <aura:attribute name="achievedValue" type="Integer" />
+    
+    <hr style="margin:0px;padding:0px;"/>
+    <div class="slds-text-heading_large" style="width:100%;text-align:center;">
+        {!v.selectedMilestoneName}
+    </div>
+    <hr style="margin:0px;padding:0px;"/>
+    <div class="slds-vertical-tabs" style="border:0px solid transparent;display: block; height:50rem;">
+        <div class="slds-grid slds-gutters" style="height:100%;">
+            <aura:if isTrue="{!v.isNotification == false}">
+                <div class="{!v.showSideView?'slds-col slds-size_1-of-3':'slds-col slds-size_0-of-3'}" data-step="1" data-intro="This is a tooltip!">
+                    <div class="{!v.showSideView?'slds-split-view_container slds-is-open':'slds-split-view_container slds-is-closed'}" style="height:100%;text-align:left;">
+                        <button onclick="{!c.toggleSideView}" class="{!v.showSideView?'slds-button slds-button_icon slds-button_icon slds-split-view__toggle-button slds-is-open':'slds-button slds-button_icon slds-button_icon slds-split-view__toggle-button slds-is-closed'}" aria-controls="split-view-id" aria-expanded="true" title="Close" style="width:1rem;background:rgb(250, 250, 249);border-top:0px;border-left:0px;border-bottom:0px;">
+                            <aura:if isTrue="{!v.showSideView}">
+                                <lightning:icon iconName="utility:left" alternativeText="Close" size="x-small"/>
+                                <aura:set attribute="else">
+                                    <lightning:icon iconName="utility:right" alternativeText="Close" size="x-small"/>
+                                </aura:set>
+                            </aura:if>
+                        </button>
+                        <article aria-hidden="false" id="split-view-id" class="slds-split-view slds-grid slds-grid_vertical slds-grow">
+                            <header class="slds-split-view__header" style="border-bottom:1px solid #ccc; margin-bottom:10px;">
+                                <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_xx-small">
+                                    <div class="slds-has-flexi-truncate">
+                                        <div class="slds-media slds-media_center">
+                                            <div class="slds-media__figure">
+                                                <div class="slds-icon_container slds-icon-standard-lead">
+                                                    <lightning:icon iconName="standard:channel_program_levels" alternativeText="Programs" />
+                                                </div>
+                                            </div>
+                                            <div class="slds-media__body" >
+                                                <h1 class="slds-text-heading_small slds-text-color_default slds-p-right_x-small">
+                                                    <button class="slds-button slds-button_reset slds-type-focus slds-truncate" aria-haspopup="true" title="">
+                                                        <span class="slds-grid slds-has-flexi-truncate slds-grid_vertical-align-center">
+                                                            <span class="slds-truncate" title="Trails">Trails</span>
+                                                        </span>
+                                                    </button>
+                                                </h1>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </header>
+                            <div class="slds-grid slds-grid_vertical">
+                                <ul aria-multiselectable="true" class="slds-scrollable_y" role="listbox" aria-label="Select an item to open it in a new workspace tab.">
+                                    <aura:iteration items="{!v.milestonePrograms}" var="selectedMilestoneProgram" indexVar="index">
+                                        <li id="{!index}" onclick="{!c.onclickTab}" class="slds-split-view__list-item" role="presentation">
+                                            <a style="border: 1px solid lightgray;
+                                                      background: white;
+                                                      margin-bottom: 0.75rem;
+                                                      margin-left: 0.30rem;
+                                                      margin-top: 0.30rem;
+                                                      margin-right:0.75rem;
+                                                      padding: 0px;" href="javascript:void(0);" aria-selected="{!selectedMilestoneProgram.active}" role="option" class="slds-split-view__list-item-action slds-grow slds-has-flexi-truncate" tabindex="0">
+                                                <div style="padding:0.5rem">
+                                                    <div class="slds-text-heading_small slds-m-bottom_small" style="width:100%;text-align:left;">
+                                                        <p class="slds-truncate">{!selectedMilestoneProgram.Onboarding_Program__r.Name}</p>
+                                                    </div>
+                                                    <div class="slds-clearfix">
+                                                        <div class="slds-clearfix">
+                                                            <div class="slds-float_left slds-text-heading_xx-small" style="color:#3e3e3c">
+                                                                <p>Duration: <strong>{!selectedMilestoneProgram.Onboarding_Program__r.Duration__c}</strong>{!' '+selectedMilestoneProgram.Onboarding_Program__r.Duration_Type__c}</p>
+                                                            </div>
+                                                            <div class="slds-float_right slds-text-heading_xx-small" style="color:#3e3e3c">
+                                                                <p>Energizers : <strong>{!selectedMilestoneProgram.Energizers__c}</strong></p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <aura:if isTrue="{!selectedMilestoneProgram.Percentage_Completed__c != ''}">
+                                                    <div class="slds-progress-bar slds-progress-bar_large" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{!selectedMilestoneProgram.Percentage_Completed__c}" role="progressbar">
+                                                        <aura:if isTrue="{!selectedMilestoneProgram.Percentage_Completed__c == 100}">
+                                                            
+                                                            <span class="slds-progress-bar__value greenProgressBar" style="{!'width:'+selectedMilestoneProgram.Percentage_Completed__c+'%;'}">
+                                                                <span class="slds-assistive-text">{!'Progress '+selectedMilestoneProgram.Percentage_Completed__c+'%'}</span>
+                                                            </span>
+                                                            <aura:set attribute="else">
+                                                                <aura:if isTrue="{!selectedMilestoneProgram.Overdue__c}">
+                                                                    <span class="slds-progress-bar__value redProgressBar" style="{!'width:'+selectedMilestoneProgram.Percentage_Completed__c+'%;'}">
+                                                                        <span class="slds-assistive-text">{!'Progress '+selectedMilestoneProgram.Percentage_Completed__c+'%'}</span>
+                                                                    </span>
+                                                                    <aura:set attribute="else">
+                                                                        <span class="slds-progress-bar__value yellowProgressBar" style="{!'width:'+selectedMilestoneProgram.Percentage_Completed__c+'%;'}">
+                                                                            <span class="slds-assistive-text">{!'Progress '+selectedMilestoneProgram.Percentage_Completed__c+'%'}</span>
+                                                                        </span>
+                                                                    </aura:set>
+                                                                </aura:if>
+                                                            </aura:set>
+                                                        </aura:if>
+                                                    </div>
+                                                    <aura:set attribute="else">
+                                                        <div class="slds-progress-bar slds-progress-bar_large" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" role="progressbar">
+                                                            <span class="slds-progress-bar__value greenProgressBar" style="width:0%;">
+                                                                <span class="slds-assistive-text">Progress 0%</span>
+                                                            </span>
+                                                        </div>
+                                                    </aura:set>
+                                                </aura:if>
+                                            </a>
+                                        </li>
+                                    </aura:iteration>
+                                </ul>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </aura:if>
+            <div class="{!v.isNotification == false ? (v.showSideView?'slds-col slds-size_2-of-3':'') : 'slds-col slds-size_3-of-3'}" style="{!v.showSideView?'':'width:100%;'}" data-step="2" data-intro="This is a tooltip!">
+                <aura:if isTrue="{!v.selectedProgram.Onboarding_Program__r.Name != null}">
+                    <div id="main" class="slds-vertical-tabs__content slds-show" role="tabpanel" aria-labelledby="slds-vertical-tabs-0__nav" style="text-align:left;">
+                        <article class="slds-card" style="border: 1px solid rgb(221, 219, 218) !important;">
+                            <lightning:layout class="programDetailLayout">
+                                <lightning:layoutItem flexibility="no-flex" padding="around-small" >
+                                    <span>
+                                        <lightning:icon iconName="standard:channel_program_levels" alternativeText="Program" />
+                                    </span>
+                                    <br/>
+                                    <aura:if isTrue="{!v.selectedProgram.Overdue__c}">
+                                        <span class="slds-icon_container" title="Warning" style="margin-top:15px;">
+                                            <c:strike_popover
+                                                              variant="base"
+                                                              placement="auto right"
+                                                              theme="error"
+                                                              withClose="false">
+                                                <aura:set attribute="popoverBody">
+                                                    <div>Overdue Trail</div>
+                                                </aura:set>
+                                                <img src="{!$Resource.attention_icon}" style="width:30px;height:30px;"/>
+                                            </c:strike_popover>
+                                        </span>
+                                    </aura:if>
+                                </lightning:layoutItem>
+                                <lightning:layoutItem flexibility="auto" padding="around-small">
+                                    <h2 class="slds-card__header-title">
+                                        <span><strong>{!v.selectedProgram.Onboarding_Program__r.Name}</strong></span>
+                                    </h2>
+                                    <div class="slds-text-body_regular">{!v.selectedProgram.Onboarding_Program__r.Description__c}</div>
+                                    <lightning:layout>
+                                        <lightning:layoutItem flexibility="auto,no-grow" padding="around-small" class="noLeftPadding">
+                                            <div><strong>Due Date: </strong><ui:outputDateTime format="MMM dd, YYYY hh:mm A" value="{!v.selectedProgram.Target_Date_Time__c}"/></div>
+                                        </lightning:layoutItem>
+                                        <lightning:layoutItem flexibility="auto,no-grow" padding="around-small">
+                                            <div><strong>Duration: </strong>{!v.selectedProgram.Onboarding_Program__r.Duration__c+' '+v.selectedProgram.Onboarding_Program__r.Duration_Type__c}</div>
+                                        </lightning:layoutItem>
+                                        <lightning:layoutItem flexibility="auto,no-grow" padding="around-small">
+                                            <div><strong>Status: </strong>{!v.selectedProgram.Status__c}</div>
+                                        </lightning:layoutItem>
+                                    </lightning:layout>
+                                    <aura:if isTrue="{!v.persona == 'MENTOR'}">
+                                        <lightning:button label="Share Feedback" iconName="standard:feedback" iconPosition="left" onclick="{!c.onClickFeedbackButton}"/>
+                                        <aura:set attribute="else">
+                                            <aura:if isTrue="{!v.persona == 'MENTEE'}">
+                                                <lightning:button disabled="{!or(v.selectedProgram.Feedback__c == null,v.selectedProgram.Feedback__c == '')}" label="View Feedback" iconName="standard:feedback" iconPosition="left" onclick="{!c.onClickFeedbackButton}"/>
+                                            </aura:if>
+                                        </aura:set>
+                                    </aura:if>
+                                </lightning:layoutItem>
+                                <lightning:layoutItem flexibility="no-flex" padding="around-small">
+                                    {!v.countdownComp}
+                                    <c:MenteeEarnings noOfEnergizers="{!v.selectedProgram.Energizers__c}" energizersBorder="border-right: 1px solid #dddbda;"
+                                                      noOfMedals="{!v.selectedProgram.Medals__c}" medalsBorder="border-right: 1px solid #dddbda;"/>
+                                </lightning:layoutItem>
+                            </lightning:layout>  
+                            <div class="slds-card__body slds-card__body_inner" style="overflow-y: auto;">
+                                <aura:if isTrue="{!v.selectedProgram.Child_Assigned_Tasks__r.length > 0}">
+                                    <lightning:accordion aura:id="accordion" activeSectionName="0">
+                                        <aura:iteration items="{!v.selectedProgram.Child_Assigned_Tasks__r}" var="assignedChildTask" indexVar="childTaskIndex">
+                                            <lightning:accordionSection name="childTaskIndex" label="{!assignedChildTask.Task__r.Name}">
+                                                <aura:set attribute="actions">
+                                                    <aura:if isTrue="{!v.persona == 'MENTOR'}">
+                                                        <button disabled="{!and(assignedChildTask.Status__c != 'Completed',assignedChildTask.Status__c != 'Closed')}" class="slds-button slds-button_neutral" id="{!childTaskIndex+'~'+assignedChildTask.Id}" onclick="{!c.onClickReopenButton}">Reopen</button>
+                                                        <button disabled="{!assignedChildTask.Status__c != 'Completed'}" class="slds-button slds-button_neutral" id="{!childTaskIndex+'~'+assignedChildTask.Id}" onclick="{!c.onClickMarkAsCompleted}">Mark as Closed</button>
+                                                    </aura:if>
+                                                    <button class="slds-button slds-button_neutral" id="{!assignedChildTask.Id}" onclick="{!c.onClickTaskName}">Collaborate</button>
+                                                    <aura:if isTrue="{!v.isEditableForUser}">
+                                                        <button class="slds-button slds-button_icon slds-button_icon-border-filled" aria-pressed="false" title="Edit" id="{!childTaskIndex+'~'+assignedChildTask.Id}" onclick="{!c.onEditStep}">
+                                                            <lightning:icon iconName="utility:edit" alternativeText="Edit" size="small" />
+                                                            <span class="slds-assistive-text">Edit</span>
+                                                        </button>
+                                                    </aura:if>
+                                                </aura:set>
+                                                <aura:set attribute="body">
+                                                    <lightning:layout>
+                                                        <lightning:layoutItem flexibility="auto" padding="around-small" class="custom-box">
+                                                            <div class="slds-text-body_regular">{!assignedChildTask.Task__r.Description__c}</div>
+                                                            <lightning:layoutItem flexibility="auto,no-grow" padding="around-small" class="noLeftPadding">
+                                                                <aura:if isTrue="{!assignedChildTask.Task__r.Link__c != null}">
+                                                                    <a href="{!assignedChildTask.Task__r.Link__c}" target="_blank">Click here to begin step</a>
+                                                                </aura:if> 
+                                                            </lightning:layoutItem>
+                                                            <lightning:layout>
+                                                                <lightning:layoutItem flexibility="auto,no-grow" padding="around-small" class="slds-border_right noLeftPadding">
+                                                                    <div><strong>Due Date: </strong> <ui:outputDateTime value="{!assignedChildTask.Target_Date_Time__c}"/></div>
+                                                                </lightning:layoutItem>
+                                                                <lightning:layoutItem flexibility="auto" padding="around-small">
+                                                                    <div><strong>Duration: </strong>{!assignedChildTask.Task__r.Duration__c+' '+assignedChildTask.Task__r.Duration_Type__c}</div>
+                                                                </lightning:layoutItem>
+                                                            </lightning:layout>
+                                                            <lightning:layout>
+                                                                <aura:if isTrue="{!assignedChildTask.Task__r.Quantifiable__c == true}">
+                                                                    <lightning:layoutItem flexibility="auto,no-grow" padding="around-small" class="noLeftPadding">
+                                                                        <div><strong>Target</strong></div>
+                                                                        <div class="slds-text-heading_small slds-m-top_xx-small"><strong>{!assignedChildTask.Task__r.Target_Value__c}</strong></div>
+                                                                    </lightning:layoutItem>
+                                                                    <lightning:layoutItem flexibility="auto,no-grow" padding="around-small">
+                                                                        <div><strong>Achieved</strong></div>
+                                                                        <div class="slds-text-heading_small slds-m-top_xx-small"><strong>{!assignedChildTask.Current_Value__c}</strong></div>
+                                                                    </lightning:layoutItem>
+                                                                </aura:if>
+                                                                <lightning:layoutItem flexibility="auto,no-grow" padding="around-small" class="{!assignedChildTask.Task__r.Quantifiable__c == false?'noLeftPadding':''}">
+                                                                    <div><strong>Status</strong></div>
+                                                                    <div class="slds-text-heading_small slds-m-top_xx-small"><strong>{!assignedChildTask.Status__c}</strong></div>
+                                                                </lightning:layoutItem>
+                                                            </lightning:layout>
+                                                        </lightning:layoutItem>
+                                                        <lightning:layoutItem flexibility="no-flex" padding="around-small" class="custom-box slds-align_absolute-center">
+                                                            <c:MenteeEarnings noOfEnergizers="{!assignedChildTask.Energizers__c}" energizersBorder=""
+                                                                              showMedals="false" medalsBorder=""/>
+                                                        </lightning:layoutItem>
+                                                    </lightning:layout>
+                                                </aura:set>
+                                            </lightning:accordionSection>
+                                        </aura:iteration>
+                                    </lightning:accordion>
+                                    <aura:set attribute="else">
+                                        <div class="slds-align_absolute-center" style="width:100%;height:100%;">
+                                            <div class="emptyResult slds-illustration slds-illustration_large forceChatterEmptyFeed" style="width:100%;">
+                                                <img src="{!$Resource.open_road}" style="width:100%;height:300px;" class="slds-m-top_large slds-illustration__svg"/>
+                                                <h3 class="slds-text-heading_medium">No Step</h3>
+                                                <p class="slds-text-body_regular" style="margin-bottom:1rem">There is no step for this Trail.</p>
+                                            </div>
+                                        </div>
+                                    </aura:set>
+                                </aura:if>
+                            </div>
+                            <footer class="slds-card__footer"></footer>
+                        </article>
+                    </div>
+                    <aura:set attribute="else">
+                        <div class="slds-align_absolute-center" style="height:100%;"> 
+                            <img src="{!$Resource.slds_desert}"/>
+                        </div>
+                    </aura:set>
+                </aura:if>
+            </div>
+        </div>
+    </div>
+    <c:strike_modal
+                    aura:id="feedbackModal"
+                    title="Feedback"
+                    primaryButtonLabel="{!v.persona == 'MENTOR'?'Submit':'OK'}"
+                    secondaryButtonLabel="{!v.persona == 'MENTOR'?'Cancel':''}"
+                    showHeader="true"
+                    showFooter="true"
+                    showClose="true"
+                    showModal="{!v.showFeedbackModal}">
+        <div style="width:100%;text-align:left;">
+            <aura:if isTrue="{!v.persona == 'MENTOR'}">
+                <lightning:textarea value="{!v.selectedProgram.Feedback__c}" label="Feedback for the Trail" />
+                <aura:set attribute="else">
+                    <aura:if isTrue="{!v.persona == 'MENTEE'}">
+                        <ui:outputTextArea value="{!v.selectedProgram.Feedback__c}"/>
+                    </aura:if>
+                </aura:set>
+            </aura:if>
+        </div>
+    </c:strike_modal>
+    <c:strike_modal
+                    aura:id="reopenModal"
+                    title="Reopen"
+                    primaryButtonLabel="Submit"
+                    secondaryButtonLabel="Cancel"
+                    showHeader="true"
+                    showFooter="true"
+                    showClose="true"
+                    showModal="{!v.showReopenModal}">
+        <div style="width:100%;text-align:left;">
+            <lightning:textarea value="{!v.reopenReason}" label="Reason to reopen" />
+        </div>
+    </c:strike_modal>
+    <c:strike_modal
+                    aura:id="editStepModal"
+                    title="Edit Step"
+                    primaryButtonLabel="Save"
+                    secondaryButtonLabel="Cancel"
+                    showHeader="true"
+                    showFooter="true"
+                    showClose="true"
+                    showModal="{!v.showEditModal}"
+                    disablePrimaryButton="false">
+        <div style="text-align:left;">
+            <aura:if isTrue="{!v.persona == 'MENTOR'}">
+                <lightning:input aura:id="expdate" label="Due Date" type="datetime" class="field" value="{!v.editTaskDetail.Target_Date_Time__c}" min="{!v.minDateTime}"/>
+                <!--<ui:inputDateTime aura:id="expdate" label="Due Date" class="field" value="{!v.editTaskDetail.Target_Date_Time__c}" displayDatePicker="true" /> -->
+                <aura:set attribute="else">
+                    <aura:if isTrue="{!v.persona == 'MENTEE'}">
+                        <aura:if isTrue="{!v.editTaskDetail.Status__c != 'Closed'}">
+                            <lightning:select label="Status" value="{!v.editTaskDetail.Status__c}">
+                                <aura:iteration items="{!v.statuses}" var="status">
+                                    <aura:if isTrue="{!and(and(status.value != 'Cancelled',status.value!= 'Closed'),status.value!='New')}">
+                                        <option text="{!status.label}" value="{!status.value}" selected="{!status.isSelected}"/>
+                                    </aura:if>
+                                </aura:iteration>
+                            </lightning:select>
+                        </aura:if>
+                        <aura:if isTrue="{!v.editTaskDetail.Task__r.Quantifiable__c == true}">
+                            <lightning:input aura:id="achieved" type="number" label="Achieved" value="{!v.editTaskDetail.Current_Value__c}" min="0.0" onchange="{!c.checkIfValidValue}"/>
+                            <!--<lightning:input aura:id="achieved" type="number" label="Achieved" disabled="false" value="{!v.editTaskDetail.Current_Value__c}" min="0.0" onchange ="{!c.checkIfValidValue}"/>
+                            <ui:inputNumber label="Current Value" value="{!v.editTaskDetail.Current_Value__c}" updateOn="keyup"/>-->
+                        </aura:if>
+                        <aura:if isTrue="{!and(v.editTaskDetail.Status__c == 'Closed',v.editTaskDetail.Task__r.Quantifiable__c == false)}">
+                            <div class="slds-text-heading_small" style="width:100%;text-align:center;">Cannot edit the step</div>
+                        </aura:if>
+                    </aura:if>
+                </aura:set>
+            </aura:if>
+            
+        </div>
+    </c:strike_modal>
+    <!--<div aura:id="promptMessage" class="slds-modal slds-fade-in-open slds-hide">
+        <div  class="slds-modal__container ">
+            <header class="slds-modal__header slds-theme_error">
+                <h2 class="slds-text-heading_medium" id="prompt-heading-id">Incorrect Value</h2>
+            </header>
+            <div class="slds-modal__content slds-p-around_medium" id="prompt-message-wrapper">
+                <p>Achieved value cannot be negative</p>
+            </div>
+            <footer class="slds-modal__footer ">
+                <button class="slds-button slds-button_neutral" onclick="{!c.closePrompt}">Ok</button>
+            </footer>
+        </div>
+    </div>-->
+    <div aura:id="taskDetailModal" style="height: 640px;" class="slds-hide">
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.onClickCloseTaskModal}">
+                        X
+                        <span class="slds-assistive-text">Close</span>
+                    </button> 
+                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">
+                        Collaborate
+                    </h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                    <!--  <div class="slds-media__figure" style="{!v.selectedTask.Mandatory__c ? 'visibility:visible;width:50%;text-align:left;':'visibility:hidden;width:50%;text-align:left;'}" >
+                        <span class="slds-icon_container">
+                            <span class="dot"></span>
+                            <span class="slds-text-body_regular">Mandatory</span>
+                        </span>
+                    </div>
+                    <div style="width:100%;text-align:left;margin-top:10px;">                                             
+                        <h3 class="slds-truncate" title="{!v.selectedTask.Task__r.Description__c}">
+                            <span class="slds-truncate slds-text-heading_small">
+                                Due on <ui:outputDate value="{!v.selectedTask.Target_Date_Time__c}" />
+                            </span>
+                        </h3>
+                    </div>
+                    <div style="width:100%;text-align:left;margin-top:10px;">                                             
+                        <h3 class="slds-truncate" title="{!v.selectedTask.Task__r.Description__c}">
+                            <span class="slds-truncate slds-text-heading_small" style="font-weight:bold">Description</span>
+                        </h3>
+                    </div>
+                    <aura:if isTrue="{!v.selectedTask.Task__r.Name}"> 
+                        <div style="width:100%;text-align:left;margin-top:10px;margin-bottom:20px">                                             
+                            <h3 class="slds-truncate" title="{!v.selectedTask.Task__r.Description__c}">
+                                <span class="slds-truncate slds-text-heading_small">{!v.selectedTask.Task__r.Description__c}</span>
+                            </h3>
+                        </div>
+                        <aura:set attribute="else">
+                            <div style="width:100%;text-align:left;margin-top:10px;margin-bottom:20px">                                             
+                                <h3 class="slds-truncate" title="{!v.selectedTask.unknown_custom_field}">
+                                    <span class="slds-truncate slds-text-heading_small">{!v.selectedTask.unknown_custom_field}</span>
+                                </h3>
+                            </div>
+                        </aura:set>
+                    </aura:if>
+                    <aura:if isTrue="{!v.selectedTask.Task__r.Link__c}"> 
+                        <div style="width:100%;text-align:left;margin-top:10px;margin-bottom:20px">                                             
+                            <h3 class="slds-truncate">
+                                <a href="{!v.selectedTask.Task__r.Link__c}" class="slds-truncate slds-text-heading_small">{!v.selectedTask.Task__r.Link__c}</a>
+                            </h3>
+                        </div>
+                    </aura:if>
+ -->
+                    <lightning:tabset aura:id="taskDetailTabset" selectedTabId="taskContribution">
+                        <!-- <lightning:tab label="TASK CONTRIBUTION" id="taskContribution">
+                            <div style="height:350px;overflow: auto;">
+                                <aura:if isTrue="{!!v.newTaskContribution}" >
+                                    <div style="text-align:right;width:100%;margin-bottom:10px">
+                                        <lightning:button variant="brand" label="New Contribution" title="New Contribution" onclick="{! c.onClickNewContribution}" />
+                                    </div>
+                                    <table class="slds-table slds-table_bordered slds-max-medium-table_stacked-horizontal">
+                                        <thead>
+                                            <tr class="slds-text-title_caps slds-is-selected">
+                                                <th scope="col" style="width:20%">
+                                                    <div class="slds-truncate" title="Date">Date
+                                                        
+                                                    </div>
+                                                </th>
+                                                <th scope="col" style="width:20%">
+                                                    <div class="slds-truncate" title="Hours Completed">Hours Logged
+                                                        
+                                                    </div>
+                                                </th>
+                                                <th scope="col" style="width:20%">
+                                                    <div class="slds-truncate" title="Count Completed">Count Completed
+                                                        
+                                                    </div>
+                                                </th>
+                                                <th scope="col">
+                                                    <div class="slds-truncate" title="Comments">Comments
+                                                        
+                                                    </div>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <aura:iteration items="{!v.assignedTaskContributions}" var="assignedTaskContribution">
+                                                <tr class="slds-hint-parent">
+                                                    <td data-label="Date">
+                                                        <div class="slds-truncate" title="{!assignedTaskContribution.Date__c}">
+                                                            <ui:outputDate value="{!assignedTaskContribution.Date__c}" />
+                                                        </div>
+                                                    </td>
+                                                    <td data-label="Account Name">
+                                                        <div class="slds-truncate" title="{!assignedTaskContribution.Hours__c}">{!assignedTaskContribution.Hours__c}</div>
+                                                    </td>
+                                                    <td data-label="Close Date">
+                                                        <div class="slds-truncate" title="{!assignedTaskContribution.Count__c}">{!assignedTaskContribution.Count__c}</div>
+                                                    </td>
+                                                    <td data-label="Prospecting">
+                                                        <div class="slds-truncate" title="{!assignedTaskContribution.Comments__c}">{!assignedTaskContribution.Comments__c}</div>
+                                                    </td>
+                                                </tr>
+                                            </aura:iteration>
+                                        </tbody>
+                                    </table>
+                                    <aura:set attribute="else">
+                                        <div style="width:100%;text-align:center">
+                                            <h3 class="slds-truncate" title="New Contribution">
+                                                <span class="slds-truncate slds-text-heading_large" style="font-weight:bold">New Contribution</span>
+                                            </h3>
+                                        </div>
+                                        <lightning:recordEditForm
+                                                                  onload="{!c.handleLoad}"
+                                                                  onsubmit="{!c.handleSubmit}"
+                                                                  onsuccess="{!c.handleSuccess}"
+                                                                  objectApiName="Assigned_Task_Contribution__c">
+                                            <lightning:messages />
+                                            
+                                            <lightning:inputField fieldName="Date__c" />
+                                            <lightning:inputField fieldName="Hours__c" />
+                                            <lightning:inputField fieldName="Count__c" />
+                                            <lightning:inputField fieldName="Comments__c" />
+                                            <lightning:inputField fieldName="Task__c" value="{!v.selectedTask.Id}" class="hiddenField"/> 
+                                            <div class="slds-m-top_medium" style="width:100%;text-align:center;">
+                                                <lightning:button variant="neutral" name="Cancel" onclick="{!c.onClickCloseNewContributionScreen}" label="Cancel" />
+                                                <lightning:button variant="brand" type="submit" name="save" label="Save" />
+                                            </div>
+                                        </lightning:recordEditForm>
+                                    </aura:set>
+                                </aura:if>
+                            </div>
+                        </lightning:tab> -->
+                        <lightning:tab label="ATTACHMENTS" id="attachments">
+                            <div style="height:350px;overflow: auto;">
+                                <div style="width:100%;text-align:center;">
+                                    <lightning:fileUpload  name="uploadAttachment"
+                                                          label= "Upload Attachment"
+                                                          multiple="true"
+                                                          recordId="{!v.selectedIdForMoreInformation}"
+                                                          onuploadfinished="{! c.onAttachmentUploadFinish }"/>
+                                </div>
+                                
+                                <lightning:layout verticalAlign="stretch" multipleRows="true" class="x-large">
+                                    <aura:iteration items="{!v.selectedTaskAttachments}" var="attachment">
+                                        <lightning:layoutItem flexibility="auto" padding="around-small" class="custom-box">
+                                            <lightning:fileCard fileId="{!attachment.ContentDocumentId}"/>
+                                        </lightning:layoutItem>
+                                    </aura:iteration>
+                                </lightning:layout>
+                            </div>
+                        </lightning:tab>
+                        <lightning:tab label="CHATTER" onactive="{! c.handleTabActive }" id="discussionTab">
+                            <div style="height:350px;overflow: auto;">
+                                {!v.body}
+                            </div>
+                        </lightning:tab>
+                    </lightning:tabset>
+                </div>
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick="{!c.onClickCloseTaskModal}">Close</button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </div>
+    
+</aura:component>

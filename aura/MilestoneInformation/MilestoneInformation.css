@@ -1,0 +1,27 @@
+.THIS .greenProgressBar{
+    background: green;
+}
+.THIS .yellowProgressBar{
+    background: yellow;
+}
+.THIS .redProgressBar{
+    background: red;
+}
+.THIS .slds-split-view__list-item:hover, .THIS .slds-split-view__list-item:focus {
+    background: transparent;
+}
+.THIS .slds-button:focus {
+    outline: 0;
+}
+.THIS .slds-split-view__list-item-action:focus {
+    box-shadow: inset 4px 0 0 rgba(27, 82, 151, 1), inset 0 0 0 1px transparent;
+}
+.THIS .slds-split-view__list-item-action[aria-selected=true]:focus {
+    box-shadow: inset 4px 0 0 rgba(27, 82, 151, 1), inset 0 0 0 1px transparent;
+}
+.THIS .programDetailLayout{
+    background : rgb(243, 242, 242);
+}
+.THIS .noLeftPadding{
+    padding-left:0px;
+}

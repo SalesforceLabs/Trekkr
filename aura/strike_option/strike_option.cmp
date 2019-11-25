@@ -1,0 +1,69 @@
+<!--
+Strike by Appiphony
+
+Version: 1.0.0
+Website: http://www.lightningstrike.io
+GitHub: https://github.com/appiphony/Strike-Components
+License: BSD 3-Clause License
+-->
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global">
+    <aura:attribute name="label" type="String" required="true" description="original, unaltered label"/>
+    <aura:attribute name="customIcon" type="Boolean" description="Determines whether or not to use svg to render icon"/>
+    <aura:attribute name="filtered" type="Boolean" description="boolean value that affects the markup if the component is hidden during a search"/>
+    <aura:attribute name="hidden" type="Boolean" description="boolean value that affects the markup if the component is hidden"/>
+    <aura:attribute name="iconName" type="String" description="name of the icon to be displayed"/>
+    <aura:attribute name="value" type="String" description="the value of the component"/>
+    <aura:attribute name="focused" type="Boolean" description="Value that determines whether or not this component has focus"/>
+    <aura:attribute name="disabled" type="Boolean" description="Determines whether the option is disabled" />
+    <aura:attribute name="destroyable" type="Boolean" default="true" description="Determines whether the option pill is destroyable in multiSelectPicklist" />
+    <!-- Internal attributes -->
+    <aura:attribute name="labelHtml" type="String" description="label to be displayed on the component" access="private"/>
+
+    <aura:handler name="init" value="{!this}" action="{!c.onInit}"/>
+
+    <aura:method name="filterBy" action="{!c.filterBy}" description="is called by the parent to determine if this component should be hidden"/>
+    <aura:method name="select" action="{!c.select}" description="sets the option as selected; is called by the parent on init and during click events"/>
+
+
+    <aura:registerEvent name="strike_evt_notifyParent" type="c:strike_evt" description="is fired when an option is selected"/>
+
+    <li class="{!if(or(v.hidden, or(v.filtered, empty(v.label))), 'slds-hide', '')}" role="presentation" onmousedown="{!c.preventDefault}" onclick="{!c.select}">
+        <span class="{!'slds-lookup__item-action slds-lookup__item-action--label' + if(v.disabled, ' strike-disabled', '') + if(v.focused, ' slds-has-focus', '')}" role="option">
+            <aura:if isTrue="{!not(empty(v.iconName))}">
+                <aura:if isTrue="{!v.customIcon}">
+                    <span class="slds-icon_container">
+                        <c:strike_svg xlinkHref="{!v.iconName}" ariaHidden="true" class="slds-icon slds-icon--small"/>
+                    </span>
+                    <aura:set attribute="else">
+                        <lightning:icon iconName="{!v.iconName}" size="small"/>
+                    </aura:set>
+                </aura:if>
+            </aura:if>
+
+            <span class="slds-truncate">
+                <aura:unescapedHtml value="{!v.labelHtml}"/>
+            </span>
+        </span>
+    </li>
+</aura:component>
+<!--
+Copyright 2017 Appiphony, LLC
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
+following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following 
+disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following 
+disclaimer in the documentation and/or other materials provided with the distribution.
+3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote 
+products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->

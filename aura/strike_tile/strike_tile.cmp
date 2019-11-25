@@ -1,0 +1,111 @@
+<!--
+Strike by Appiphony
+
+Version: 1.0.0
+Website: http://www.lightningstrike.io
+GitHub: https://github.com/appiphony/Strike-Components
+License: BSD 3-Clause License
+-->
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global">
+    <!-- Required Attributes -->
+    <aura:attribute name="title" required="true" type="String" description="the tile's title"/>
+    
+    <!-- External Attributes -->
+    <aura:attribute name="variant" type="String" default="base" description="Variant of the tile component"/>
+    <aura:attribute name="value" type="String" description="value of the selected option"/>
+    <aura:attribute name="link" type="String" description="link on the tile's title"/>
+    <aura:attribute name="subtitle" type="String" description="the tile's secondary title"/>
+    <aura:attribute name="alternativeText" type="String" description="alternative text for an avatar image"/>
+    <aura:attribute name="destroyable" type="Boolean" default="{!false}" description="Determines whether a remove button is displayed or not"/>
+    <aura:attribute name="checked" type="Boolean" default="{!false}" description="Determines whether the task is checked"/>
+    <aura:attribute name="iconName" type="String" description="icon to be displayed on the tile"/>
+    <aura:attribute name="avatarSource" type="String" description="url of portrait image displayed on the tile" default="http://i.pravatar.cc/300"/>
+    
+    <!-- Events -->
+    <aura:registerEvent name="strike_evt_componentDestroyed" type="c:strike_evt" description="is fired when a tile is destroyed"/>
+    
+    <!-- Methods -->
+    <aura:method name="destroyTile" action="{!c.destroyTile}"/>
+    
+
+    <div class="{!'slds-tile' + if(v.variant != 'base', ' slds-media', '') + if(v.destroyable == true, ' st-destroyable', '')}">
+        <aura:if isTrue="{!v.destroyable}">
+            <lightning:buttonIcon iconName="utility:close" variant="bare" alternativeText="Remove" class="slds-button st-remove" onclick="{!c.destroyTile}"/>
+        </aura:if>
+        
+        <aura:if isTrue="{!or(or(v.variant == 'icon', v.variant == 'task'), v.variant == 'avatar')}">
+            <div class="slds-media__figure">
+                <aura:if isTrue="{!v.variant == 'icon'}">
+                    <lightning:icon iconName="{!v.iconName}" alternativeText="{!v.alternativeText}"/>
+                </aura:if>
+                <aura:if isTrue="{!v.variant == 'task'}">
+                    <lightning:input type="checkbox" name="checked" label="{!v.title}" checked="{!v.checked}"/>
+                </aura:if>
+                <aura:if isTrue="{!v.variant == 'avatar'}">
+                    <lightning:avatar src="{!v.avatarSource}" alternativeText="{!v.alternativeText}" variant="circle"/>
+                </aura:if>
+            </div>
+            <div class="slds-media__body">
+                <!-- Content -->
+                <h3 class="{!'slds-truncate' + if(v.destroyable, ' slds-p-right--xx-large', '')}" title="{!v.title}">
+                    <aura:if isTrue="{!empty(v.link)}">
+                        {!v.title}
+                        <aura:set attribute="else">
+                            <a href="{!v.link}">{!v.title}</a>
+                        </aura:set>
+                    </aura:if>
+                </h3>
+                <div class="{!'slds-tile__detail slds-text-body--small' + if(v.destroyable, ' slds-p-right--xx-large', '')}">
+                    <aura:if isTrue="{!empty(v.body)}">
+                        {!v.subtitle}
+                        <aura:set attribute="else">
+                            {!v.body}
+                        </aura:set>
+                    </aura:if>
+                </div>
+                <!-- Content -->
+            </div>
+            <aura:set attribute="else">
+                <!-- Content -->
+                <h3 class="{!'slds-truncate' + if(v.destroyable, ' slds-p-right--xx-large', '')}" title="{!v.title}">
+                    <aura:if isTrue="{!empty(v.link)}">
+                        {!v.title}
+                        <aura:set attribute="else">
+                            <a href="{!v.link}">{!v.title}</a>
+                        </aura:set>
+                    </aura:if>
+                </h3>
+                <div class="{!'slds-tile__detail slds-text-body--small' + if(v.destroyable, ' slds-p-right--xx-large', '')}">
+                    <aura:if isTrue="{!empty(v.body)}">
+                        {!v.subtitle}
+                        <aura:set attribute="else">
+                            {!v.body}
+                        </aura:set>
+                    </aura:if>
+                </div>
+                <!-- Content -->
+            </aura:set>
+        </aura:if>
+    </div>
+</aura:component>
+<!--
+Copyright 2017 Appiphony, LLC
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
+following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following 
+disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following 
+disclaimer in the documentation and/or other materials provided with the distribution.
+3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote 
+products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->

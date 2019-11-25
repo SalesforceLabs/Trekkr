@@ -1,0 +1,333 @@
+<!-- Component to create a new onboarding task -->
+<aura:component controller="NewOnboardingProgramCntr" implements="force:appHostable,flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" >
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:attribute name="userRoles" type="List"/>
+    <aura:attribute name="tasksList" type="List" default="[]"/>
+    <aura:attribute name="selectedRoles" type="String"/>
+    <aura:attribute name="programDetail" type="Onboarding_Program__c" default="{'sObjectType':'Onboarding_Program__c','Public__c': true}"/>
+    <aura:attribute name="selectedRecord" type="sObject" default="{}" />
+    <aura:attribute name="selectedOptionPills" type="List"/>
+    <aura:attribute name="newEditTaskRecord" type="On_boarding_Task__c" default="{'sObjectType':'On_boarding_Task__c'}"/>
+    <aura:attribute name="taskRecordTypes" type="List" />
+    <aura:attribute name="taskDurationTypes" type="List" />
+    <aura:attribute name="taskDifficulties" type="List" />
+    <aura:attribute name="milestones" type="List" />
+    <aura:attribute name="modalTitle" type="String" />
+    <aura:attribute name="isCurrentTaskEditable" type="Boolean" default="true"/>
+    <aura:attribute name="showAddTaskModal" type="Boolean" default="false"/>
+    <aura:attribute name="showAssignTrailModal" type="Boolean" default="false"/>
+    <aura:attribute name="taskCustomLookup" type="List" />
+    <aura:attribute name="alertMessageComponent" type="List" />
+    <aura:attribute name="taskAlertMessageComponent" type="List" />
+    <aura:attribute name="programCustomLookup" type="List" />
+    <aura:attribute name="advanced" type="Boolean" default="false"/>
+    <aura:attribute name="selectedTaskTypeName" type="String" default=""/>
+    <aura:attribute name="taskCustomLookupCount" type="Integer" default="0"/>
+    <aura:attribute name="taskModalSaveButtonTitle" type="String" default="Save"/>
+    <aura:attribute name="programCustomLookupCount" type="Integer" default="0"/>
+    <aura:attribute name="showAlertMessage" type="Boolean" default="false"/>
+    <aura:attribute name="showTaskAlertMessage" type="Boolean" default="false"/>
+    <aura:attribute name="clearMultipicklist" type="Boolean" default="false"/>
+    <aura:attribute name="alertMessage" type="String" default=""/>
+    <aura:attribute name="onProgramCreated" type="Aura.Action" />
+    <aura:attribute name="createdProgram" type="Onboarding_Program__c"/>
+    <aura:attribute name="createdTaskList" type="List"/>
+    <aura:attribute name="createdUserRoles" type="String"/>
+    <aura:attribute name="assignToUserId" type="String"/>
+    <aura:attribute name="targetDateTime" type="Date"/>
+    <aura:attribute name="selectedMilestone" type="String"/>
+    <aura:attribute name="minDateTime" type="String"/>
+    <aura:attribute name="currentMilestonePos" type="Integer"/>
+    <aura:attribute name="editStepRowNo" type="Integer"/>
+    <aura:attribute name="onDataChange" type="Aura.Action"/>
+    <aura:handler name="oSelectedRecordEvent" event="c:selectedsObjectRecordEvent" action="{!c.handleComponentEvent}"/>
+    <aura:handler name="strike_evt_modalPrimaryButtonClicked" event="c:strike_evt" action="{!c.onClickModalPrimaryButton}"/>
+    
+    <div class="slds-card">
+        <aura:if isTrue="{!v.showAlertMessage}">
+            <div style="padding:10px;"> 
+                {!v.alertMessageComponent}
+            </div>
+        </aura:if>
+        <div class="slds-form" role="list" style="padding:10px;">
+            <div class="slds-form__row">
+                <div class="slds-form__item" role="listitem">
+                    <abbr class="slds-required" title="required">*</abbr>
+                    <div class="slds-form-element slds-form-element_stacked slds-hint-parent">
+                        <div class="slds-form-element__control">
+                            <div class="slds-form-element__static">
+                                {!v.programCustomLookup}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-form__item" role="listitem">
+                    <abbr class="slds-required" title="required">*</abbr>
+                    <div class="slds-form-element slds-form-element_stacked slds-hint-parent">
+                        <div class="slds-form-element__control">
+                            <c:strike_multiSelectPicklist 
+                                                          clear="{!v.clearMultipicklist}"
+                                                          value="{!v.selectedRoles}"
+                                                          label="Role(s)"
+                                                          errorMessage="Invalid input"
+                                                          helpText="Trails applicable to these role(s)">
+                                <aura:iteration items="{!v.userRoles}" var="userRole">
+                                    <c:strike_option label="{!userRole.Name}" value="{!userRole.Id}" />
+                                </aura:iteration>
+                            </c:strike_multiSelectPicklist>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="slds-form__row">
+                <div class="slds-form__item" role="listitem">
+                    <abbr class="slds-required" title="required">*</abbr>
+                    <div class="slds-form-element slds-form-element_stacked slds-hint-parent">
+                        <div class="slds-form-element__control">
+                            <ui:inputTextArea aura:id="descriptionTA" label="Trail Description" value="{!v.programDetail.Description__c}"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-form__item" role="listitem">
+                    <div class="slds-form-element slds-form-element_stacked slds-hint-parent">
+                        <div class="slds-form-element__control">
+                            <div class="slds-form-element__static slds-form-element__label">
+                                <aura:if isTrue="{!v.advanced}">
+                                    <label class="slds-form-element__label" for="lookup-348" data-aura-rendered-by="4:1014;a">Add to Template</label>
+                                    <ui:inputCheckbox aura:id="checkbox" label="" value="{!v.programDetail.Public__c}"/>
+                                </aura:if>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="width:100%;background:#F4F6F9;padding:10px;">
+            <div class="slds-clearfix">
+                <div class="slds-clearfix">
+                    <div class="slds-float_left">
+                        <div class="slds-text-heading_small slds-p-top_x-small">Steps</div>
+                    </div>
+                    <div class="slds-float_right">
+                        <lightning:button label="Add Step" title="Add Step" onclick="{! c.onClickNewTask }"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slds-border_bottom slds-border_top">
+            <aura:if isTrue="{!v.tasksList.length > 0}">
+                <table aria-multiselectable="true" class="slds-table slds-table_bordered slds-table_fixed-layout slds-table_resizable-cols" role="grid">
+                    <thead>
+                        <tr class="slds-line-height_reset">
+                            <th style="width:25%;" aria-label="Name" aria-sort="none" class="slds-is-resizable slds-is-sortable slds-cell-wrap" scope="col">
+                                <a class="slds-th__action slds-text-link_reset" href="javascript:void(0);" role="button" tabindex="-1">
+                                    <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                                        <span class="slds-truncate" title="Name">Step Name</span>
+                                    </div>
+                                </a>
+                            </th>
+                            <th style="width:25%;" aria-label="Description" aria-sort="none" class="slds-is-resizable slds-is-sortable slds-cell-wrap" scope="col">
+                                <a class="slds-th__action slds-text-link_reset" href="javascript:void(0);" role="button" tabindex="-1">
+                                    <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                                        <span class="slds-truncate" title="Name">Step Type</span>
+                                    </div>
+                                </a>
+                            </th>
+                            <th style="width:25%;" aria-label="Due Date" aria-sort="none" class="slds-is-resizable slds-is-sortable slds-cell-wrap" scope="col">
+                                <a class="slds-th__action slds-text-link_reset" href="javascript:void(0);" role="button" tabindex="-1">
+                                    <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                                        <span class="slds-truncate" title="Name">Step Description</span>
+                                    </div>
+                                </a>
+                            </th>
+                            <th style="width:25%;" aria-label="Due Date" aria-sort="none" class="slds-is-resizable slds-is-sortable slds-cell-wrap" scope="col">
+                                <a class="slds-th__action slds-text-link_reset" href="javascript:void(0);" role="button" tabindex="-1">
+                                    <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                                        <span class="slds-truncate" title="Name"></span>
+                                    </div>
+                                </a>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <aura:iteration items="{!v.tasksList}" var="lTask" indexVar="taskPosition">
+                            <tr aria-selected="false" class="slds-hint-parent">
+                                <td scope="row" tabindex="0" class="slds-cell-wrap">
+                                    <div class="slds-truncate">
+                                        {!lTask.Name}
+                                    </div>
+                                </td>
+                                <td scope="row" tabindex="0" class="slds-cell-wrap">
+                                    <div class="slds-truncate">
+                                        {!lTask.taskTypeName}
+                                    </div>
+                                </td>
+                                <td scope="row" tabindex="0" class="slds-cell-wrap">
+                                    <div class="slds-truncate">
+                                        {!lTask.Description__c}
+                                    </div>
+                                </td>
+                                <td scope="row" tabindex="0" class="slds-cell-wrap">
+                                    <div class="slds-truncate">
+                                        <div class="slds-button-group slds-float_right" role="group">
+                                            <button id="{!taskPosition}" class="slds-button slds-button_icon slds-button_icon-border-filled" title="Edit" aria-pressed="false" onclick="{!c.onClickEdit}">
+                                                <lightning:icon iconName="utility:edit" alternativeText="Edit" size="x-small" />
+                                            </button>
+                                            <button id="{!taskPosition}" class="slds-button slds-button_icon slds-button_icon-border-filled" title="Delete" aria-pressed="false" onclick="{!c.onClickDelete}">
+                                                <lightning:icon iconName="utility:delete" alternativeText="Delete" size="x-small"/>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </aura:iteration>
+                    </tbody>
+                </table>
+                <aura:set attribute="else">
+                    <div class="emptyResult slds-illustration slds-illustration_large forceChatterEmptyFeed">
+                        <img src="{!$Resource.open_road}" style="width:100%;height:300px;" class="slds-m-top_large slds-illustration__svg"/>
+                        <h3 class="slds-text-heading_medium">No steps here</h3>
+                        <p class="slds-text-body_regular" style="margin-bottom:1rem">A trail comprises of steps to be done by the explorer</p>
+                        <button class="slds-button slds-button_neutral slds-m-bottom_large" onclick="{! c.onClickNewTask }">Add Step</button>
+                    </div>
+                </aura:set>
+            </aura:if>
+        </div>
+        <div class="slds-m-top_x-large" style="padding-right:10px;">
+            <div class="slds-form slds-form_stacked">
+                <div class="slds-form-element">
+                    <div class="slds-form-element__control" style="text-align:right;width:100%">
+                        <aura:if isTrue="{!v.advanced}">
+                            <lightning:button variant="brand" label="Create &amp; Assign Trail" title="Create &amp; Assign Trail" onclick="{! c.onClickCreateAndAssignProgram }"/>
+                        </aura:if>
+                        <lightning:button variant="brand" label="Create Trail" title="Create Trail" onclick="{! c.onClickCreateProgram }"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <c:strike_modal
+                    aura:id="assignTrailModal"
+                    title="Assign Trail"
+                    primaryButtonLabel="Assign"
+                    secondaryButtonLabel="Cancel"
+                    showHeader="true"
+                    showFooter="true"
+                    showClose="true"
+                    showModal="{!v.showAssignTrailModal}">
+        <lightning:input label="Date Time Due" aura:id="today" type="datetime" class="field" value="{!v.targetDateTime}" min="{!v.minDateTime}"/>
+        <lightning:select label="Milestone" value="{!v.selectedMilestone}">
+            <aura:iteration items="{!v.milestones}" var="milestone">
+                <option text="{!milestone.label}" value="{!milestone.value}"/>
+            </aura:iteration>
+        </lightning:select>
+    </c:strike_modal>
+    <c:strike_modal
+                    aura:id="newEditStepModal"
+                    title="{!v.modalTitle}"
+                    primaryButtonLabel="{!v.taskModalSaveButtonTitle}"
+                    secondaryButtonLabel="Cancel"
+                    showHeader="true"
+                    showFooter="true"
+                    showClose="true"
+                    showModal="{!v.showAddTaskModal}">
+        <div class="slds-form">
+            <aura:if isTrue="{!v.showTaskAlertMessage}">
+                <div style="padding:10px;"> 
+                    {!v.taskAlertMessageComponent}
+                </div>
+            </aura:if>
+            <div class="slds-form-element slds-form-element_stacked">
+                <div class="slds-form-element__control">
+                    {!v.taskCustomLookup}
+                </div>
+            </div>
+            <aura:if isTrue="{!!v.isCurrentTaskEditable}">
+                <div class="slds-form-element slds-form-element_stacked">
+                    <div class="slds-form-element__control" style="text-align:right;">
+                        <button class="slds-button slds-button_neutral" title="Edit" aria-pressed="false" onclick="{!c.onClickEditTaskDetail}">Edit
+                            <lightning:icon class="slds-button__icon slds-button__icon_right" iconName="utility:edit" alternativeText="Edit" size="x-small" />
+                        </button>
+                    </div>
+                </div>
+            </aura:if>
+            <div class="slds-form-element slds-form-element_stacked">
+                <div class="slds-form-element__control">
+                    <lightning:select disabled="{!!v.isCurrentTaskEditable}" onchange="{!c.onChangeTypeOfTask}" name="select" label="Step Type" value="{!v.newEditTaskRecord.RecordTypeId}">
+                        <option text="--Select--" value=""/>
+                        <aura:iteration items="{!v.taskRecordTypes}" var="taskRecordType">
+                            <option text="{!taskRecordType.Name}" value="{!taskRecordType.Id}"/>
+                        </aura:iteration>
+                    </lightning:select>
+                </div>
+            </div>
+            <aura:if isTrue="{!v.selectedTaskTypeName == 'Business'}">
+                <div class="slds-form-element slds-form-element_stacked">
+                    <div class="slds-form-element__control">
+                        <label class="slds-form-element__label">Quantifiable</label> <br/>
+                        <lightning:input disabled="{!!v.isCurrentTaskEditable}" messageToggleActive="Yes" messageToggleInactive="No" type="toggle" label="" checked="{!v.newEditTaskRecord.Quantifiable__c}"/>
+                    </div>
+                </div>
+            </aura:if>
+            <aura:if isTrue="{!v.newEditTaskRecord.Quantifiable__c}">
+                <div class="slds-form-element slds-form-element_stacked">
+                    <div class="slds-form-element__control">
+                        <ui:inputNumber disabled="{!!v.isCurrentTaskEditable}" class="slds-input" label="Target" value="{!v.newEditTaskRecord.Target_Value__c}"/>    
+                    </div>
+                </div>
+            </aura:if>
+            <aura:if isTrue="{!v.selectedTaskTypeName == 'Business'}">
+                <div class="slds-form-element slds-form-element_stacked">
+                    <div class="slds-form-element__control">
+                        <label class="slds-form-element__label">Mandatory</label> <br/>
+                        <ui:inputCheckbox disabled="{!!v.isCurrentTaskEditable}" label="" value="{!v.newEditTaskRecord.Mandatory__c}"/>
+                    </div>
+                </div>
+            </aura:if>
+            <div class="slds-form-element slds-form-element_stacked">
+                <div class="slds-form-element__control">
+                    <lightning:textarea disabled="{!!v.isCurrentTaskEditable}" label="Step Description" value="{!v.newEditTaskRecord.Description__c}"/>
+                </div>
+            </div>
+            <div class="slds-form-element slds-form-element_stacked">
+                <div class="slds-form-element__control">
+                    <ui:inputURL disabled="{!!v.isCurrentTaskEditable}" class="slds-input" label="Link" value="{!v.newEditTaskRecord.Link__c}"/>
+                </div>
+            </div>
+            <aura:if isTrue="{!v.selectedTaskTypeName == 'Business'}">
+                <div class="slds-form-element slds-form-element_stacked">
+                    <div class="slds-form-element__control">
+                        <div class="slds-clearfix">
+                            <div class="slds-clearfix">
+                                <div class="slds-float_left" style="width:69%">
+                                    <ui:inputNumber disabled="{!!v.isCurrentTaskEditable}" class="slds-input" label="Step Duration" value="{!v.newEditTaskRecord.Duration__c}"/>
+                                </div>
+                                <div class="slds-float_right" style="width:30%;">
+                                    <lightning:select disabled="{!!v.isCurrentTaskEditable}" name="select" label="&nbsp;" value="{!v.newEditTaskRecord.Duration_Type__c}">
+                                        <aura:iteration items="{!v.taskDurationTypes}" var="taskDurationType">
+                                            <option text="{!taskDurationType.label}" value="{!taskDurationType.value}"/>
+                                        </aura:iteration>
+                                    </lightning:select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aura:if>
+            <aura:if isTrue="{!v.selectedTaskTypeName == 'Business'}">
+                <div class="slds-form-element slds-form-element_stacked">
+                    <div class="slds-form-element__control">
+                        <lightning:select disabled="{!!v.isCurrentTaskEditable}" name="select" label="Step Level" value="{!v.newEditTaskRecord.Level__c }">
+                            <option text="--Select--" value=""/>
+                            <aura:iteration items="{!v.taskDifficulties}" var="taskDifficulty">
+                                <option text="{!taskDifficulty.label}" value="{!taskDifficulty.value}"/>
+                            </aura:iteration>
+                        </lightning:select>
+                    </div>
+                </div>
+            </aura:if>
+        </div>
+    </c:strike_modal>
+    <lightning:spinner alternativeText="Loading" aura:id="ltngSpiner" size="medium" />
+</aura:component>

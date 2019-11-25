@@ -1,0 +1,140 @@
+<!--
+Strike by Appiphony
+
+Version: 1.0.0
+Website: http://www.lightningstrike.io
+GitHub: https://github.com/appiphony/Strike-Components
+License: BSD 3-Clause License
+-->
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global">
+    <aura:attribute name="label" type="String" description="String value displayed above the menu used to describe the component" />
+
+    <aura:attribute name="helpText" type="String" description="String value when hovering over the help box"/>
+    <aura:attribute name="helpTextPlacement" type="String" default="auto top" description="Determines position of the helpText"/>
+    <aura:attribute name="class" type="String" description="A CSS class that will be applied to the outer element. This style is in addition to base classes associated with the component"/>
+    <aura:attribute name="name" type="String" description="String value of the component's form name"/>
+    <aura:attribute name="placeholder" type="String" description="String value that will appear when no option is selected" />
+    <aura:attribute name="value" type="String" description="String value of the value of the selected option" />
+
+    <aura:attribute name="errorMessage" type="String" description="String value displayed when the input is in an error state" />
+
+    <aura:attribute name="searchable" type="Boolean" description="Determines whether a search input is displayed on the component" />
+
+    <aura:attribute name="disabled" type="Boolean" description="Determines whether the input is disabled" />
+    <aura:attribute name="required" type="Boolean" description="Determines whether a '*' is displayed on the component" />
+    <aura:attribute name="error" type="Boolean" description="Determines whether the input is in an error state" />
+    <aura:attribute name="scrollPosition" type="String" description="Scroll position used to lock drop down list"/>
+
+    <!-- Methods -->
+    <aura:method name="showError" action="{!c.showError}" description="A method which triggers the error state">
+        <aura:attribute name="errorMessage" type="String"/>
+    </aura:method>
+    <aura:method name="hideError" action="{!c.hideError}" description="A method which removes the error state"/>
+
+    <!-- Internal -->
+    <aura:attribute name="focusIndex" type="Integer" access="private" default="-1" description="Integer value that determines which option is currently selected"/>
+    <aura:attribute name="iconName" type="String" access="private" description="String value of the icon of the selected option"/>
+    <aura:attribute name="menuOpen" type="Boolean" access="private" description="Determines whether the menu is open"/>
+    
+    <aura:attribute name="valueLabel" type="String" access="private" description="String value of the label of the selected option"/>
+    <aura:attribute name="isMobile" type="Boolean" default="{!false}" description="Determines if the user is in Salesforce1" access="private"/>
+    <aura:attribute name="allChildrenFiltered" type="Boolean" description="is set to true if none of the strikeOption components are displayed" default="{!false}"/>
+    <aura:attribute name="noResultsMessage" type="String" default="No results found for {0}" description="String value that will appear when the component finds 0 results"/>
+    <aura:attribute name="searchTerm" type="String" description="String value of the user's entered search term"/>
+
+    <!-- Event registration and handlers -->
+    <aura:handler name="init" value="{!this}" action="{!c.onInit}" />
+    <aura:handler name="change" value="{!v.value}" action="{!c.handleValueChange}" />
+
+    <aura:handler event="aura:doneRendering" action="{!c.doneRendering}" />
+    <aura:handler name="strike_evt_notifyParent" event="c:strike_evt" action="{!c.handleNotifyParent}" includeFacets="true" description="handles when a StrikeOption is clicked" />
+
+    <aura:registerEvent name="onchange" type="c:strike_evt"/>
+
+    <!-- Strike Picklist -->
+    <div class="{!'slds-form-element ' + if(v.error, 'slds-has-error ', '') + if(v.isMobile, 'sp-picklist--mobile ', '') + v.class}" onclick="{!c.stopProp}" aura:id="sp-container">
+        <label class="slds-form-element__label" onclick="{!c.showMenu}">
+            <aura:if isTrue="{!v.required}">
+                <abbr class="slds-required" title="required">*</abbr>
+            </aura:if>
+            {!v.label}
+        </label>
+        <aura:if isTrue="{!not(empty(v.helpText))}">
+            <c:strike_tooltip placement="{!v.helpTextPlacement}" text="{!v.helpText}" class="sp-help-text-icon">
+                <lightning:icon iconName="utility:info" size="xx-small"/>
+            </c:strike_tooltip>
+        </aura:if>
+        <input name="{!v.name}" value="{!v.value}" type="hidden" />
+        <div class="{!'slds-picklist slds-dropdown-trigger slds-dropdown-trigger--click' + if(v.menuOpen, ' slds-is-open', '') + if(v.disabled, ' sp-disabled', '')}" aria-expanded="true">
+            <div class="slds-form-element__control">
+                <div aura:id="dropdown-trigger" class="slds-button slds-button--neutral slds-input slds-picklist__input slds-text-color--default slds-picklist__label sp-menu-button" aria-haspopup="true" onfocus="{!c.showMenu}" tabindex="{!if(v.menuOpen, '-1', '0')}">
+                    <span class="slds-truncate sp-selected-text" title="{!v.valueLabel}">
+                        <aura:if isTrue="{!not(empty(v.iconName))}">
+                            <lightning:icon class="sp-selected-icon slds-input__icon" iconName="{!v.iconName}" size="x-small" />
+                        </aura:if>
+                        {!if(empty(v.valueLabel), v.placeholder, v.valueLabel)}
+                    </span>
+                    <lightning:icon class="sp-dropdown-icon" iconName="utility:down" size="xx-small" />
+                </div>
+                <div aura:id="picklistMenu" class="{!'slds-dropdown slds-dropdown--left slds-dropdown--small sp-dropdown-control' + if(v.menuOpen, ' slds-is-open', '')}" onclick="{!c.stopProp}">
+                    <ui:scrollerWrapper class="slds-scrollable--y sp-scroll-container">
+                        <div class="sp-picklist__mobile-header slds-grid slds-grid--pull-padded-xx-small">
+                            <div class="{!'sp-picklist__input slds-col slds-p-horizontal--xx-small' + if(v.searchable, '', ' slds-hide')}">
+                                <div class="slds-form-element slds-m-vertical--x-small slds-m-horizontal--small">
+                                    <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon--right">
+                                        <c:strike_svg class="slds-input__icon slds-icon-text-default" xlinkHref="/resource/icons/utility-sprite/svg/symbols.svg#search" ariaHidden="true"></c:strike_svg>
+                                        <input aura:id="searchTerm" class="slds-input" type="text" onkeyup="{!c.searchTermChanged}" onclick="{!c.stopProp}"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <aura:if isTrue="{!v.isMobile}">
+                                <div class="{!'sp-picklist--mobile__cancel slds-col slds-p-horizontal--xx-small slds-text-align--right' + if(v.searchable, ' slds-no-flex', ' sp-full-button_container')}">
+                                    <button class="slds-button slds-button--neutral" onclick="{!c.blur}">Cancel</button>
+                                </div>
+                            </aura:if>
+                        </div>
+                        <ul class="slds-dropdown__list slds-dropdown--length-5" role="menu">
+                            <aura:if isTrue="{!v.allChildrenFiltered}">
+                                <li role="presentation">
+                                    <span class="slds-lookup__item-action slds-media sl-no-results" role="option">
+                                        <div class="slds-media__body">
+                                            <div class="slds-lookup__result-text">
+                                                {!format(v.noResultsMessage, '"' + v.searchTerm + '"')}
+                                            </div>
+                                        </div>
+                                    </span>
+                                </li>
+                            </aura:if>
+                            {!v.body}
+                        </ul>
+                    </ui:scrollerWrapper>
+                </div>
+            </div>
+            <aura:if isTrue="{!and(v.error, not(empty(v.errorMessage)))}">
+                <div class="slds-form-element__help">{!v.errorMessage}</div>
+            </aura:if>
+        </div>
+        
+    </div>
+</aura:component>
+<!--
+Copyright 2017 Appiphony, LLC
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the 
+following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following 
+disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following 
+disclaimer in the documentation and/or other materials provided with the distribution.
+3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote 
+products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->

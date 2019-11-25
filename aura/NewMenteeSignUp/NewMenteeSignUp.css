@@ -1,0 +1,12 @@
+.THIS .slds-form__row{
+    margin-top:5px;
+    margin-bottom:10px;
+}
+
+.THIS .slds-form-element__static{
+    font-size:.75rem;
+}
+
+.THIS .date_submit{
+    margin-top: -17px;
+}

@@ -1,0 +1,27 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global">
+    <aura:attribute name="targetDateTime" type="DateTime"/>
+    <aura:attribute name="intervalVar" type="object"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <div>
+        <div id="clockdiv">
+            <div>
+                <span id="days" class="slds-border_bottom slds-border_top slds-border_left slds-border_right">0</span>
+                <div class="smalltext">Days</div>
+            </div>
+            <div>
+                <span id="hours" class="slds-border_bottom slds-border_top slds-border_left slds-border_right">0</span>
+                <div class="smalltext">Hours</div>
+            </div>
+            <div>
+                <span id="minutes" class="slds-border_bottom slds-border_top slds-border_left slds-border_right">0</span>
+                <div class="smalltext">Minutes</div>
+            </div>
+            <div>
+                <span id="seconds" class="slds-border_bottom slds-border_top slds-border_left slds-border_right">0</span>
+                <div class="smalltext">Seconds</div>
+            </div>
+        </div>
+    </div>
+    
+</aura:component>

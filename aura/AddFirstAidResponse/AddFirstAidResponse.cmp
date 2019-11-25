@@ -1,0 +1,16 @@
+<aura:component implements="force:lightningQuickActionWithoutHeader,force:hasRecordId,forceCommunity:availableForAllPageTypes" controller="AddFirstAidResponseCntr" access="global">
+    <aura:attribute name="response" type="String"/>
+     <aura:handler name='init' value='{!this}' action='{!c.init}' />
+    <div>
+        <header class="slds-modal__header">
+            <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Add your response</h2>
+        </header>
+        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+            <lightning:textarea label="Response" value="{!v.response}"/>
+        </div>
+        <footer class="slds-modal__footer">
+            <button class="slds-button slds-button_neutral" onclick="{!c.onClickCancel}">Cancel</button>
+            <button class="slds-button slds-button_brand" onclick="{!c.onClickSave}">Save</button>
+        </footer>
+    </div>
+</aura:component>

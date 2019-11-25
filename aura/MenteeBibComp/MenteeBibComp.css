@@ -1,0 +1,59 @@
+.THIS .header_content {
+    font-size: 15px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+    font-weight: bold;
+}
+
+.THIS .profile_pic{
+    display:inline-block;
+}
+
+.THIS .profile_name{
+    display:inline-block;
+    margin-left:10px;
+    font-size:15px;
+    font-weight:bold;
+    position: relative;
+}
+
+.THIS .profile_designation{
+ 	font-size:13px;
+    font-weight:300;   
+}
+
+.THIS .profile_connect {
+    padding-top: 10px;
+    border-top: 1px solid #ccc;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.THIS.slds-box {
+    background: white !important;
+}
+
+.THIS .circle { 
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border:1px solid #dddbda;
+}
+.THIS .smallCircle { 
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    border:1px solid #dddbda;
+}
+.THIS .clickCursor{
+    cursor : pointer;
+}
+.THIS .slds-form-element__label{
+    display : none;
+}
+.THIS .scroll::-webkit-scrollbar {
+    -webkit-appearance: none;
+}

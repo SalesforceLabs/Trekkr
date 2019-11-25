@@ -1,0 +1,10 @@
+<aura:component implements="force:appHostable,lightning:isUrlAddressable" controller="RaiseAndCloseProgramCntr">
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:attribute name="milestoneInformationBody" type="List" default="[]"/>
+    <aura:attribute name="milestonInformationCompCount" type="Integer" default="0"/>
+
+    <div class="slds-card">
+        <div class="slds-text-heading_large" style="text-align:center;font-weight:bold;">Trail Information</div>
+        {!v.milestoneInformationBody}
+    </div>
+</aura:component>

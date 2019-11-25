@@ -1,0 +1,64 @@
+<aura:component controller="MenteeProfileCntr" implements="flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global" >
+    
+    <aura:attribute name="selectedMentee" type="User"/>
+    <aura:attribute name="menteeAssignmentInformation" type="List"/>
+    <aura:attribute name="taskListsComponentDiv" type="List"/>
+    <aura:attribute name="selectedMilestoneName" type="String"/>
+    <aura:attribute name="currentMilestonePos" type="Integer"/>
+    <aura:attribute name="selectedMilestonePrograms" type="List"/>
+    <aura:attribute name="milestoneInformationBody" type="List"/>
+    <aura:attribute name="milestonInformationCompCount" type="Integer" default="0"/>
+    <ltng:require 
+                  styles="{!$Resource.IntroJs+'/introjs.css'}" 
+                  scripts="{!$Resource.IntroJs+'/intro.js'}" 
+                  afterScriptsLoaded="{!c.doInit}" 
+                  />
+    <lightning:spinner alternativeText="Loading" aura:id="ltngSpiner" size="medium" class="slds-hide"/>
+    <div class="slds-card " style="text-align:center;min-height:400px;padding:10px;" id="headerPanel">
+        <table style="height:50px;" >
+            <tr>
+                <td style="width:5%;text-align:center;">
+                </td>
+                <td style="width:95%;text-align:center;">
+                    <div class="slds-text-heading_large" style="margin-top:20px;margin-bottom:10px">Progress Tracker</div>
+                </td>
+            </tr>  
+        </table>
+        <hr style="padding:0px;margin:0px;"/>
+        <c:MenteeEarnings noOfEnergizers="{!v.selectedMentee.Energizers__c}" 
+                          noOfMedals="{!v.selectedMentee.Medals__c}"/>
+        <div>
+            <table style="height:100%">
+                <tr style="height:100%">
+                    <td style="text-align:center;">
+                        <lightning:layout>
+                            <lightning:layoutItem flexibility="no-shrink" padding="around-large">
+                                <div>
+                                    <div>
+                                        <lightning:helptext content="Click on the milestones to view progress"/>
+                                        <aura:if isTrue="{!and(v.selectedMentee.FullPhotoUrl!=null,v.selectedMentee.FullPhotoUrl!='')}">
+                                            <img src="{!v.selectedMentee.FullPhotoUrl}" class="circle" />
+                                            <aura:set attribute="else">
+                                                <img src="{!$Resource.lightning_blue_profile_avatar}" class="circle" />
+                                            </aura:set>
+                                        </aura:if>
+                                    </div>
+                                    <div class="slds-text-heading_small" style="margin-top:4px;">{!v.selectedMentee.FirstName+' '+v.selectedMentee.LastName}</div>
+                                    <aura:iteration items="{!v.selectedMentee.User_User_Role_Junctions__r}" var="userRoleJunction">
+                                        <div class="slds-text-body_regular" style="margin-bottom:10px;">{!userRoleJunction.User_Role__r.Name}</div>
+                                    </aura:iteration>
+                                </div>
+                            </lightning:layoutItem>
+                            <lightning:layoutItem flexibility="auto" padding="around-medium">
+                                <c:MenteeProgressPath persona="MENTEE" aura:id="menteeProgressPathCmp" onClickMilestone="{!c.onClickMilestone}" currentMilestonePos="{!v.currentMilestonePos}" menteeAssignmentInformation="{!v.menteeAssignmentInformation}"/>
+                            </lightning:layoutItem>
+                        </lightning:layout>
+                    </td>
+                </tr>
+            </table>
+            <div style="margin-top:30px;" id="scrollHere">
+                {!v.milestoneInformationBody}
+            </div>
+        </div>
+    </div>
+</aura:component>

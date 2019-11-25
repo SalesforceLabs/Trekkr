@@ -1,0 +1,9 @@
+.THIS .slds-form-element__label{
+    display : none;
+}
+.THIS .slds-form-element{
+    width:100%;
+}
+.THIS .slds-left-align{
+    text-align:left;
+}

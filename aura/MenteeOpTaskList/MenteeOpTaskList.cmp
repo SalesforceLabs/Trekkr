@@ -1,0 +1,89 @@
+<!-- Lightning component to show the list of operational tasks for a mentee -->
+<aura:component controller="MenteeOpTaskListCntr" implements ="force:appHostable,flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global">
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:attribute name="menteeTaskList" type="Assigned_Task__c[]"/>
+    <aura:attribute name="selectedTask" type="Assigned_Task__c"/>
+    <aura:attribute name="showDetailModal" type="Boolean" default="false"/>
+    <aura:handler name="strike_evt_modalPrimaryButtonClicked" event="c:strike_evt" action="{!c.onClickModalPrimaryButton}"/>
+    
+    
+    <article class="slds-card">
+        <div class="slds-card__header slds-grid">
+            <header class="slds-media slds-media_center slds-has-flexi-truncate">
+                <div class="slds-media__figure">
+                    <lightning:icon iconName="standard:task"/>
+                </div>
+                <div class="slds-media__body">
+                    <h2 class="slds-card__header-title">
+                        <a href="javascript:void(0);" class="slds-card__header-link slds-truncate" title="First Aid">
+                            <span>Checklist</span>
+                        </a>
+                    </h2>
+                    <h2 class="slds-text-body_regular ">
+                        <span>List view of operational steps
+                            <c:strike_tooltip
+                                              placement="right"
+                                              text="Mark steps done by clicking on the icons next to the steps">
+                                <lightning:icon iconName="utility:info" size="xx-small"/>
+                            </c:strike_tooltip>
+                        </span>
+                    </h2>
+                </div>
+            </header>
+        </div>
+        <div class="slds-card__body" style="padding-left:10px;padding-right:10px;">
+            <ul class="slds-has-dividers--around-space">
+                <aura:iteration items="{!v.menteeTaskList}" var="task" indexVar="index">
+                    <aura:if isTrue="{!equals(task.Status__c,'Completed')}">
+                        <li class="slds-item">
+                            <div class="slds-clearfix slds-align_absolute-center">
+                                <div class="slds-float_left width-set-listIcon" id="{!index}" onclick ="{!c.changeStatus}">
+                                    <img src="{!$Resource.statusIcons+'/done.png'}"/>
+                                </div>
+                                <div class="slds-float_left width-set-listItem" onclick = "{!c.taskDetails}" id="{!index}" data-value="{!task.Task__r.Id+'~'+index}">
+                                    <a>{!task.Task__r.Name}</a>
+                                </div>
+                            </div>
+                        </li>
+                        <aura:set attribute="else">
+                            <li class="slds-item">
+                                <div class="slds-clearfix slds-align_absolute-center">
+                                    <div class="slds-float_left width-set-listIcon" id="{!index}" onclick ="{!c.changeStatus}">
+                                        <img src="{!$Resource.statusIcons+'/wrong.png'}"/>
+                                    </div>
+                                    <div class="slds-float_left width-set-listItem" onclick = "{!c.taskDetails}" id="{!index}" data-value="{!task.Task__r.Id+'~'+index}">
+                                        <a>{!task.Task__r.Name}</a>
+                                    </div>
+                                </div>
+                            </li>
+                        </aura:set>
+                    </aura:if>
+                </aura:iteration>
+            </ul>
+        </div>
+    </article>
+    <c:strike_modal
+                    aura:id="viewTaskDetail"
+                    title="{!v.selectedTask.Task__r.Name}"
+                    secondaryButtonLabel=""
+                    primaryButtonLabel="OK"
+                    showHeader="true"
+                    showFooter="true"
+                    showClose="true"
+                    showModal="{!v.showDetailModal}">
+        <div class="slds-form-element slds-form-element_readonly">
+            <span class="slds-form-element__label">Description</span>
+            <div class="slds-form-element__control">
+                <div class="slds-form-element__static">{!v.selectedTask.Task__r.Description__c}</div>
+            </div>
+            <span class="slds-form-element__label">Link</span>
+            <div class="slds-form-element__control">
+                <a class="slds-form-element__static" href="{!v.selectedTask.Task__r.Link__c}">{!v.selectedTask.Task__r.Link__c}</a>
+            </div>
+            <span class="slds-form-element__label">Due Date</span>
+            <div class="slds-form-element__control">
+                <div class="slds-form-element__static"><ui:outputDate value="{!v.selectedTask.Target_Date_Time__c}"/> </div>
+            </div>
+        </div>
+    </c:strike_modal>
+</aura:component>

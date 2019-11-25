@@ -1,0 +1,304 @@
+<aura:component controller="AssignProgramsCntr">
+    <aura:attribute name="programTypeOptions" type="List" default="[
+                                                                   {'label': 'All Trails', 'value': 'allPrograms'},
+                                                                   {'label': 'Suggested Trails', 'value': 'suggestedPrograms'}
+                                                                   ]"/>
+    <aura:attribute name="onClickNewProgram" type="Aura.Action"/>
+    <aura:attribute name="menteeDetail" type="User"/>
+    <aura:attribute name="showMilestoneModal" type="Boolean" default="false"/>
+    <aura:attribute name="showProgramDetailModal" type="Boolean" default="false"/>
+    <aura:attribute name="showConfirmationDialog" type="Boolean" default="false"/>
+    <aura:attribute name="allPrograms" type="List"/>
+    <aura:attribute name="backupPrograms" type="List"/>
+    <aura:attribute name="recommendedPrograms" type="List"/>
+    <aura:attribute name="programsType" type="String" default="allPrograms"/>
+    <aura:attribute name="selectedPrograms" type="List"/>
+    <aura:attribute name="searchedText" type="String"/>
+    <aura:attribute name="programToAdd" type="Onboarding_Program__c"/>
+    <aura:attribute name="viewDetailsForProgram" type="Onboarding_Program__c"/>
+    <aura:attribute name="pageNo" type="Integer" default="1"/>
+    <aura:attribute name="onDataChange" type="Aura.Action"/>
+    <aura:attribute name="milestones" type="List"/>
+    <aura:handler name="strike_evt_modalPrimaryButtonClicked" event="c:strike_evt" action="{!c.onClickModalPrimaryButton}"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:attribute name="minDateTime" type="String" />
+    <aura:attribute name="currentMilestonePos" type="Integer"/>
+    
+    <lightning:spinner alternativeText="Loading" aura:id="ltngSpiner" size="medium" class="slds-hide"/>
+    <div class="slds-modal__content slds-grid slds-nowrap" id="modal-content-id-1">
+        <div class="slds-col slds-grid slds-grid_vertical slds-nowrap">
+            <div class="slds-p-vertical_x-small slds-p-horizontal_large slds-shrink-none slds-theme_shade">
+                <lightning:layout class="slds-align_absolute-center">
+                    <lightning:layoutItem flexibility="auto, no-grow" padding="around-small" class="slds-left-align">
+                        <span class="slds-text-body_regular" style="text-align:left">
+                            <strong>Explorer : </strong>{!v.menteeDetail.FirstName+' '+v.menteeDetail.LastName}
+                        </span> <br/>
+                        <span class="slds-text-body_regular" style="text-align:left">
+                            <strong>Onboarding Start Date : </strong> <ui:outputDate value="{!v.menteeDetail.Joining_Date__c}" />
+                        </span> <br/>
+                        <span class="slds-text-body_regular" style="text-align:left">
+                            <strong>Target Onboarding Due Date : </strong><ui:outputDate value="{!v.menteeDetail.On_boarding_End_Date__c}" />
+                        </span>
+                    </lightning:layoutItem>
+                    <aura:if isTrue="{!v.pageNo == 1}">
+                        <lightning:layoutItem flexibility="auto" padding="around-small">
+                            <div class="slds-form-element">
+                                <div class="slds-form-element__control">
+                                    <div class="slds-combobox_container">
+                                        <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click" aria-expanded="false" aria-haspopup="listbox" role="combobox">
+                                            <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none">
+                                                <div onkeyup="{! c.onSearch }">
+                                                    <lightning:input
+                                                                     onchange="{!c.onChangeSearch}"
+                                                                     value="{!v.searchedText}"
+                                                                     label="Search.."
+                                                                     type="search"
+                                                                     />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </lightning:layoutItem>
+                        <lightning:layoutItem flexibility="auto, no-grow" padding="around-small">
+                            <lightning:radioGroup name="radioButtonGroup"
+                                                  label="Radio Button Group"
+                                                  options="{! v.programTypeOptions }"
+                                                  value="{! v.programsType }"
+                                                  type="button"/>
+                        </lightning:layoutItem>
+                        <lightning:layoutItem flexibility="auto, no-grow" padding="around-small">
+                            <button class="slds-button slds-button_brand" onclick="{!c.onClickNewProgram}">New Trail</button>
+                        </lightning:layoutItem>
+                        <aura:set attribute="else">
+                            <lightning:layoutItem flexibility="auto" padding="around-small">
+                                <div class="slds-text-heading_medium" style="font-weight:bold;">Selected Trails</div>
+                            </lightning:layoutItem>
+                        </aura:set>
+                    </aura:if>
+                </lightning:layout>
+            </div>
+            <div class="slds-scrollable slds-grow">
+                <div class="slds-scrollable_none" style="height:500px;overflow-y:scroll;">
+                    <aura:if isTrue="{!v.pageNo == 1}">
+                        <aura:if isTrue="{!v.programsType == 'allPrograms'}">
+                            <aura:if isTrue="{!v.allPrograms.length >0}">
+                                <aura:iteration items="{!v.allPrograms}" var="programDetail" indexVar="index">
+                                    <lightning:layout>
+                                        <lightning:layoutItem flexibility="auto, no-grow" padding="around-small">
+                                            <div class="slds-checkbox_add-button">
+                                                <input class="slds-assistive-text" onclick="{!c.onSelectProgram}" checked="{!programDetail.checked}" type="checkbox" id="{!index}" tabindex="-1" value="{!programDetail.Id}" />
+                                                <label for="{!index}" class="slds-checkbox_faux">
+                                                    <span class="slds-assistive-text">Select Trail</span>
+                                                </label>
+                                            </div>
+                                        </lightning:layoutItem>
+                                        <lightning:layoutItem flexibility="auto" padding="around-small">
+                                            <div class="slds-clearfix slds-border_top slds-border_bottom slds-border_left slds-border_right" style="padding:10px;border-radius:5px;">
+                                                <div class="slds-clearfix">
+                                                    <div class="slds-float_left">
+                                                        <p><strong>{!programDetail.Name}</strong></p>
+                                                    </div>
+                                                    <div class="slds-float_right">
+                                                        <p>{!programDetail.Duration__c+' '+programDetail.Duration_Type__c}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </lightning:layoutItem>
+                                        <lightning:layoutItem flexibility="auto, no-grow" padding="around-small">
+                                            <button id="{!index}" disabled="{!or(programDetail.Onboarding_Program_Task_Junctions__r == null,programDetail.Onboarding_Program_Task_Junctions__r.length == 0)}" class="slds-button slds-button_neutral" onclick="{!c.onClickDetails}">View Steps</button>
+                                        </lightning:layoutItem>
+                                    </lightning:layout>
+                                </aura:iteration>
+                                <aura:set attribute="else">
+                                    <div class="emptyResult slds-illustration slds-illustration_large forceChatterEmptyFeed">
+                                        <img src="{!$Resource.open_road}" style="width:100%;height:300px;" class="slds-m-top_large slds-illustration__svg"/>
+                                        <h3 class="slds-text-heading_medium">No Trail </h3>
+                                        <p class="slds-text-body_regular" style="margin-bottom:1rem">Change Trail Type or create a new one</p>
+                                        <button class="slds-button slds-button_neutral slds-m-bottom_large" onclick="{! c.onClickNewProgram }">New Trail</button>
+                                    </div>
+                                </aura:set>
+                            </aura:if>
+                            <aura:set attribute="else">
+                                <aura:if isTrue="{!v.recommendedPrograms.length >0}">
+                                    <aura:iteration items="{!v.recommendedPrograms}" var="programDetail" indexVar="index">
+                                        <lightning:layout>
+                                            <lightning:layoutItem flexibility="auto, no-grow" padding="around-small">
+                                                <div class="slds-checkbox_add-button">
+                                                    <input class="slds-assistive-text" onclick="{!c.onSelectProgram}" checked="{!programDetail.checked}" type="checkbox" id="{!index}" tabindex="-1" value="{!programDetail.Id}" />
+                                                    <label for="{!index}" class="slds-checkbox_faux">
+                                                        <span class="slds-assistive-text">Select Trail</span>
+                                                    </label>
+                                                </div>
+                                            </lightning:layoutItem>
+                                            <lightning:layoutItem flexibility="auto" padding="around-small">
+                                                <div class="slds-clearfix slds-border_top slds-border_bottom slds-border_left slds-border_right" style="padding:10px;border-radius:5px;">
+                                                    <div class="slds-clearfix">
+                                                        <div class="slds-float_left">
+                                                            <p><strong>{!programDetail.Name}</strong></p>
+                                                        </div>
+                                                        <div class="slds-float_right">
+                                                            <p>{!programDetail.Duration__c+' '+programDetail.Duration_Type__c}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </lightning:layoutItem>
+                                            <lightning:layoutItem flexibility="auto, no-grow" padding="around-small">
+                                                <button id="{!index}" disabled="{!or(programDetail.Onboarding_Program_Task_Junctions__r == null,programDetail.Onboarding_Program_Task_Junctions__r.length == 0)}" class="slds-button slds-button_neutral" onclick="{!c.onClickDetails}">View Steps</button>
+                                            </lightning:layoutItem>
+                                        </lightning:layout>
+                                    </aura:iteration>
+                                    <aura:set attribute="else">
+                                        <div class="emptyResult slds-illustration slds-illustration_large forceChatterEmptyFeed">
+                                            <img src="{!$Resource.open_road}" style="width:100%;height:300px;" class="slds-m-top_large slds-illustration__svg"/>
+                                            <h3 class="slds-text-heading_medium">No Trail ?</h3>
+                                            <p class="slds-text-body_regular" style="margin-bottom:1rem">Change Trail Type or create a new one</p>
+                                            <button class="slds-button slds-button_neutral slds-m-bottom_large" onclick="{! c.onClickNewProgram }">New Trail</button>
+                                        </div>
+                                    </aura:set>
+                                </aura:if>
+                            </aura:set>
+                        </aura:if>
+                        <aura:set attribute="else">
+                            <table aria-multiselectable="true" class="slds-table slds-table_bordered slds-table_fixed-layout slds-table_resizable-cols" role="grid">
+                                <thead>
+                                    <tr class="slds-line-height_reset">
+                                        <th aria-label="Name" aria-sort="none" class="slds-is-resizable slds-is-sortable" scope="col">
+                                            <a class="slds-th__action slds-text-link_reset" href="javascript:void(0);" role="button" tabindex="-1">
+                                                <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                                                    <span class="slds-truncate" title="Trail Name">Trail Name</span>
+                                                </div>
+                                            </a>
+                                        </th>
+                                        <th aria-label="Account Name" aria-sort="none" class="slds-is-resizable slds-is-sortable" scope="col">
+                                            <a class="slds-th__action slds-text-link_reset" href="javascript:void(0);" role="button" tabindex="-1">
+                                                <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                                                    <span class="slds-truncate" title="Date Time Due">Date Time Due
+                                                        <abbr class="slds-required" title="required">* </abbr>
+                                                    </span>
+                                                </div>
+                                            </a>
+                                        </th>
+                                        <th aria-label="Close Date" aria-sort="none" class="slds-is-resizable slds-is-sortable" scope="col">
+                                            <a class="slds-th__action slds-text-link_reset" href="javascript:void(0);" role="button" tabindex="-1">
+                                                <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                                                    <span class="slds-truncate" title="Milestone">Milestone
+                                                    <abbr class="slds-required" title="required">* </abbr>
+                                                    </span>
+                                                </div>
+                                            </a>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <aura:iteration items="{!v.selectedPrograms}" var="selectedProgram">
+                                        <tr aria-selected="false" class="slds-hint-parent">
+                                            <td role="gridcell">
+                                                <div class="slds-truncate" title="Acme">
+                                                	{!selectedProgram.Name}
+                                                </div>
+                                            </td>
+                                            <td role="gridcell">
+                                                <div class="slds-truncate" title="Program Date Time">
+                                                    <lightning:input aura:id="today" type="datetime" class="field" value="{!selectedProgram.Target_Date_Time__c}" min="{!v.minDateTime}"/>
+                                                	<!--<ui:inputDateTime aura:id="today" class="field" value="{!selectedProgram.Target_Date_Time__c}" displayDatePicker="true" />-->
+                                                </div>
+                                            </td>
+                                            <td role="gridcell">
+                                                <div class="slds-truncate" title="Milestone">
+                                                    <lightning:select label="Milestone" value="{!selectedProgram.Milestone__c}">
+                                                        <aura:iteration items="{!v.milestones}" var="milestone">
+                                                            <option text="{!milestone.label}" value="{!milestone.value}"/>
+                                                        </aura:iteration>
+                                                    </lightning:select>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </aura:iteration>
+                                </tbody>
+                            </table>
+                        </aura:set>
+                    </aura:if>
+                </div>
+                <div class="slds-border_top slds-m-top_medium slds-m-bottom_medium" style="padding-top:10px;text-align:right">
+                    <aura:if isTrue="{!v.pageNo == 1}">
+                        <button class="slds-button slds-button_brand" onclick="{!c.onClickNext}" disabled="{!v.selectedPrograms.length == 0}">Next</button>
+                        <aura:set attribute="else">
+                            <button class="slds-button slds-button_neutral" onclick="{!c.onClickBack}">Back</button>
+                            <button class="slds-button slds-button_brand" onclick="{!c.onClickAssignPrograms}">Assign Trails</button>
+                        </aura:set>
+                    </aura:if>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+    <c:strike_modal
+                    aura:id="viewProgramDetails"
+                    title="{!'Steps for '+v.viewDetailsForProgram.Name}"
+                    showHeader="true"
+                    showFooter="false"
+                    showClose="true"
+                    showModal="{!v.showProgramDetailModal}">
+        <div style="width:100%;text-align:left;">
+            <table aria-multiselectable="true" class="slds-table slds-table_bordered slds-table_fixed-layout slds-table_resizable-cols" role="grid">
+                <thead>
+                    <tr class="slds-line-height_reset">
+                        <th aria-label="Name" aria-sort="none" class="slds-is-resizable slds-is-sortable" scope="col">
+                            <a class="slds-th__action slds-text-link_reset" href="javascript:void(0);" role="button" tabindex="-1">
+                                <span class="slds-assistive-text">Sort by: </span>
+                                <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                                    <span class="slds-truncate" title="Name">Name</span>
+                                </div>
+                            </a>
+                        </th>
+                        <th aria-label="Account Name" aria-sort="none" class="slds-is-resizable slds-is-sortable" scope="col">
+                            <a class="slds-th__action slds-text-link_reset" href="javascript:void(0);" role="button" tabindex="-1">
+                                <span class="slds-assistive-text">Sort by: </span>
+                                <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                                    <span class="slds-truncate" title="Account Name">Description</span>
+                                </div>
+                            </a>
+                        </th>
+                        <th aria-label="Close Date" aria-sort="none" class="slds-is-resizable slds-is-sortable" scope="col">
+                            <a class="slds-th__action slds-text-link_reset" href="javascript:void(0);" role="button" tabindex="-1">
+                                <span class="slds-assistive-text">Sort by: </span>
+                                <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                                    <span class="slds-truncate" title="Close Date">Duration</span>
+                                </div>
+                            </a>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <aura:iteration items="{!v.viewDetailsForProgram.Onboarding_Program_Task_Junctions__r}" var="onboardingTask">
+                        <tr aria-selected="false" class="slds-hint-parent">
+                            <th scope="row" tabindex="0">
+                                <div class="slds-truncate" title="{!onboardingTask.Onboarding_Task__r.Name}">
+                                    {!onboardingTask.Onboarding_Task__r.Name}
+                                </div>
+                            </th>
+                            <td role="gridcell">
+                                <div class="slds-truncate" title="{!onboardingTask.Onboarding_Task__r.Description__c}">
+                                    {!onboardingTask.Onboarding_Task__r.Description__c}
+                                </div>
+                            </td>
+                            <td role="gridcell">
+                                <div class="slds-truncate" title="{!onboardingTask.Onboarding_Task__r.Duration__c+' '+onboardingTask.Onboarding_Task__r.Duration_Type__c}">
+                                    {!onboardingTask.Onboarding_Task__r.Duration__c+' '+onboardingTask.Onboarding_Task__r.Duration_Type__c}    
+                                </div>
+                            </td>
+                        </tr>
+                    </aura:iteration>
+                </tbody>
+            </table>
+        </div>
+    </c:strike_modal>
+    <aura:if isTrue="{!v.showConfirmationDialog}">
+        <c:ConfirmationDialog 
+                              messageBody="You have unsaved changes on this screen. If you proceed, all these changes will be deleted. Are you sure you want to continue ?" 
+                              onClickCancel="{!c.onClickCancel_ConfirmationDialog}"
+                              onClickConfirm="{!c.onClickConfirm_ConfirmationDialog}"/>
+    </aura:if>
+</aura:component>

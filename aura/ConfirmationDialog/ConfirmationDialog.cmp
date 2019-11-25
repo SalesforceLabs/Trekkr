@@ -1,0 +1,31 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global">
+    <aura:attribute name="onClickConfirm" type="Aura.Action" required="true"/>
+    <aura:attribute name="confirmButtonLabel" type="String" default="Confirm"/>
+    <aura:attribute name="onClickCancel" type="Aura.Action" required="true"/>
+    <aura:attribute name="cancelButtonLabel" type="String" default="Cancel"/>
+    <aura:attribute name="messageBody" type="String" required="true"/>
+    <aura:attribute name="title" type="String" default="Confirmation"/>
+    
+    <section role="alertdialog" tabindex="-1" aria-labelledby="prompt-heading-id" aria-describedby="prompt-message-wrapper" class="slds-modal slds-fade-in-open slds-modal_prompt" aria-modal="true">
+        <div class="slds-modal__container">
+            <header class="slds-modal__header slds-theme_success">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close">
+                    X
+                    <span class="slds-assistive-text">Close</span>
+                </button>
+                <h2 class="slds-text-heading_medium" id="prompt-heading-id">{!v.title}</h2>
+            </header>
+            <div class="slds-modal__content slds-p-around_medium" id="prompt-message-wrapper">
+                <div class="slds-text-body_regular">
+                    <aura:unescapedHtml value="{!v.messageBody}"/>
+                </div>
+            </div>
+            <footer class="slds-modal__footer slds-theme_default">
+                <button class="slds-button slds-button_brand" onclick="{!v.onClickConfirm}">{!v.confirmButtonLabel}</button>
+                <button class="slds-button slds-button_neutral" onclick="{!v.onClickCancel}">{!v.cancelButtonLabel}</button>
+            </footer>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+    
+</aura:component>

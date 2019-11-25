@@ -1,0 +1,39 @@
+.THIS .button1{
+    border-radius: 4px;
+    background-color: #1b5197;
+    height: 32px;
+    width: 78px;
+    color:white;
+}
+.THIS .circle { 
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border:1px solid #dddbda;
+}
+.THIS .smallCircle { 
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border:1px solid #dddbda;
+}
+.THIS .profile_name{
+    display:inline-block;
+    margin-left:10px;
+    font-size:15px;
+    font-weight:bold;
+    position: relative;
+}
+
+.THIS .profile_designation{
+ 	font-size:13px;
+    font-weight:300;   
+}
+
+.THIS .profile_extend {
+    border: 1px solid #ccc;
+    margin: 10px;
+    border-radius: 4px;
+}

@@ -1,0 +1,26 @@
+.THIS #clockdiv{
+    font-family: sans-serif;
+    color: #fff;
+    display: inline-block;
+    font-weight: 100;
+    text-align: center;
+}
+.THIS #clockdiv > div{
+    padding: 5px;
+    border-radius: 3px;
+    display: inline-block;
+    margin:3px;
+}
+.THIS #clockdiv div > span{
+    padding: 8px;
+    border-radius: 3px;
+    color : black;
+    border-radius : 4px;
+    font-size:14px;
+    display: inline-block;
+}
+.THIS .smalltext{
+    padding-top: 3px;
+    font-size: 12px;
+    color:black;
+}

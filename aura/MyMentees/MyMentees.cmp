@@ -1,0 +1,22 @@
+<aura:component access="global" implements="forceCommunity:availableForAllPageTypes">
+    <aura:attribute name="menteesList" type="List"/>
+    <aura:attribute name="selectedMentee" type="String"/>
+    <aura:attribute name="onClickViewProfile" type="Aura.Action"/>
+    <aura:attribute name="buttonLabel" type="String" default="View Progress"/>
+    
+    <div style="overflow: auto;white-space: nowrap;">
+        <aura:iteration items="{!v.menteesList}" var="mentee" indexVar="rowNo">
+            <div style="display: inline-block;text-align: center;padding: 14px;text-decoration: none;margin-right:25px">
+                <div style="width:100%;text-align:center;margin:5px;">
+                    <img src="{!mentee.FullPhotoUrl}" class="circle" />
+                </div>
+                <div class="slds-text-heading_small" style="margin-top:4px;">{!mentee.FirstName+' '+mentee.LastName}</div>
+                <aura:iteration items="{!mentee.User_User_Role_Junctions__r}" var="userRoleJunction">
+                    <div class="slds-text-body_regular" style="margin-bottom:10px;">{!userRoleJunction.User_Role__r.Name}</div>
+                </aura:iteration>
+                <button id="{!rowNo}" class="slds-button slds-button_brand introjs-showElement introjs-relativePosition" onclick="{!c.onClickMentee}" data-step="1" data-intro="Click here to view Explorer's Profile">{!v.buttonLabel}</button>
+            </div>
+        </aura:iteration>
+    </div>
+    <lightning:spinner alternativeText="Loading" aura:id="ltngSpiner" size="medium" class="slds-hide"/>
+</aura:component>

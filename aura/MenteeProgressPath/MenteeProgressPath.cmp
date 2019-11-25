@@ -1,0 +1,256 @@
+<aura:component access="global" implements="forceCommunity:availableForAllPageTypes">
+    <aura:attribute name="menteeDetail" type="User"/>
+    <aura:attribute name="noOfMilestones" type="Integer"/>
+    <aura:attribute name="menteeAssignmentInformation" type="List"/>
+    <aura:attribute name="currentMilestonePos" type="Integer"/>
+    <aura:handler name="change" value="{!v.menteeAssignmentInformation}" action="{!c.doInit}"/>
+    <aura:attribute name="onClickMilestone" type="Aura.Action"/>
+    <aura:attribute name="selectedMilestoneName" type="String" />
+    <aura:attribute name="selectedMilestoneIndex" type="Integer"/>
+    <aura:attribute name="selectedMilestonePrograms" type="List" />
+    <aura:attribute name="persona" type="String" default="MENTOR"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <lightning:spinner alternativeText="Loading" aura:id="ltngSpiner" size="medium" class="slds-hide"/>
+    
+    <aura:if isTrue="{!v.noOfMilestones == 0}">
+        <div class="emptyResult slds-illustration slds-illustration_large forceChatterEmptyFeed">
+            <img src="{!$Resource.Walkthrough_Not_Available}" style="height:200px;width:400px;" class="slds-m-top_large slds-illustration__svg"/>
+            <aura:if isTrue="{!v.persona == 'MENTEE'}">
+                <h3 class="slds-text-heading_medium">No Trails</h3>
+                <p class="slds-text-body_regular" style="margin-bottom:1rem">Looks like you have no trails at the moment</p>
+                <aura:set attribute="else">
+                    <h3 class="slds-text-heading_medium">No Trails</h3>
+                    <p class="slds-text-body_regular" style="margin-bottom:1rem">Please assign trails to this Explorer to start onboarding</p>
+                </aura:set>
+            </aura:if>
+        </div>        
+        <aura:set attribute="else">
+            <aura:if isTrue="{!or(v.noOfMilestones == 1,v.noOfMilestones == 2)}">
+                <aura:if isTrue="{!v.persona == 'MENTEE'}">
+                    <div class="slds-text-heading_medium">Looks like you have no trails at the moment</div>
+                    <aura:set attribute="else">
+                        <div class="slds-text-heading_medium">{!'There are only '+v.noOfMilestones+' milestone(s) created for this Explorer. Add atleast 3 milestone to start onboarding'}</div>
+                    </aura:set>
+                </aura:if>
+                <aura:set attribute="else">
+                    <aura:if isTrue="{!v.noOfMilestones == 3}">
+                        <div class="c-container">
+                            <lightning:layout>                                        
+                                <aura:iteration items="{!v.menteeAssignmentInformation}" var="menteeAssignment" indexVar="index">
+                                    <aura:if isTrue="{!index == 0}">
+                                        <lightning:layoutItem flexibility="auto" class="noPadding">
+                                            <div style="cursor:pointer;position:absolute;margin-top:125px;">
+                                                <c:strike_popover
+                                                                  variant="base"
+                                                                  placement="auto right"
+                                                                  theme="info"
+                                                                  withClose="false">
+                                                    <aura:set attribute="header">
+                                                        Start Point
+                                                    </aura:set>
+                                                    <aura:set attribute="popoverBody">
+                                                    </aura:set>
+                                                    <aura:if isTrue="{!v.currentMilestonePos == index}">
+                                                        <img src="{!$Resource.Selected_Astro}" style="width:60px;"/>
+                                                        <aura:set attribute="else">
+                                                            <aura:if isTrue="{!lessthan(index,v.currentMilestonePos)}">
+                                                                <img src="{!$Resource.completed_checkpoint}" style="width:30px"/>
+                                                                <aura:set attribute="else">
+                                                                    <img src="{!$Resource.checkpoint_icon}" style="width:30px;"/>
+                                                                </aura:set>
+                                                            </aura:if>
+                                                        </aura:set> 
+                                                    </aura:if>
+                                                </c:strike_popover>
+                                            </div>         
+                                        </lightning:layoutItem>
+                                    </aura:if>
+                                    <lightning:layoutItem flexibility="auto" class="noPadding">
+                                        <aura:if isTrue="{!menteeAssignment.milestoneComplete == true}">
+                                            <img src="{!$Resource.checkpoint_paths+'/3-checkpoints/'+(index+1)+'.png'}" />
+                                            <aura:set attribute="else">
+                                                <img src="{!$Resource.checkpoint_paths+'/3-checkpoints/'+(index+1)+'a.png'}"/>
+                                            </aura:set>
+                                        </aura:if>
+                                    </lightning:layoutItem>
+                                    <lightning:layoutItem flexibility="auto" class="noPadding">
+                                        <div style="{!'cursor:pointer;position:absolute;'+(index == 0?'margin-top:105px':(index == 1?'margin-top:-15px':(index == 2?'margin-top:30px':'')))}">
+                                            <c:strike_popover
+                                                              variant="base"
+                                                              placement="auto right"
+                                                              theme="info"
+                                                              withClose="false">
+                                                <aura:set attribute="header">
+                                                    {!menteeAssignment.milestoneName}
+                                                </aura:set>
+                                                <aura:set attribute="popoverBody">
+                                                </aura:set>
+                                                <aura:if isTrue="{!v.currentMilestonePos == index+1}">
+                                                    <img src="{!$Resource.Selected_Astro}" id="{!menteeAssignment.milestoneName+'~'+index}" onclick="{!c.onClickCheckpoint}" style="width:60px;"/>
+                                                    <aura:set attribute="else">
+                                                        <aura:if isTrue="{!lessthan(index,v.currentMilestonePos)}">
+                                                            <img src="{!$Resource.completed_checkpoint}" id="{!menteeAssignment.milestoneName+'~'+index}" onclick="{!c.onClickCheckpoint}" style="width:30px;"/>
+                                                            <aura:set attribute="else">
+                                                                <img src="{!$Resource.checkpoint_icon}" id="{!menteeAssignment.milestoneName+'~'+index}" onclick="{!c.onClickCheckpoint}" style="width:30px;"/>
+                                                            </aura:set>
+                                                        </aura:if>
+                                                    </aura:set> 
+                                                </aura:if>
+                                            </c:strike_popover>
+                                        </div>           
+                                    </lightning:layoutItem>
+                                </aura:iteration>
+                            </lightning:layout>
+                        </div>
+                        <aura:set attribute="else">
+                            <aura:if isTrue="{!v.noOfMilestones == 4}">
+                                <div class="c-container">
+                                    <lightning:layout>
+                                        <aura:iteration items="{!v.menteeAssignmentInformation}" var="menteeAssignment" indexVar="index">
+                                            <aura:if isTrue="{!index == 0}">
+                                                <lightning:layoutItem flexibility="auto" class="noPadding">
+                                                    <div style="cursor:pointer;position:absolute;margin-top:95px;">
+                                                        <c:strike_popover
+                                                                          variant="base"
+                                                                          placement="auto right"
+                                                                          theme="info"
+                                                                          withClose="false">
+                                                            <aura:set attribute="header">
+                                                                Start Point
+                                                            </aura:set>
+                                                            <aura:set attribute="popoverBody">
+                                                            </aura:set>
+                                                            <aura:if isTrue="{!v.currentMilestonePos == index}">
+                                                                <img src="{!$Resource.Selected_Astro}" style="width:60px;"/>
+                                                                <aura:set attribute="else">
+                                                                    <aura:if isTrue="{!lessthan(index,v.currentMilestonePos)}">
+                                                                        <img src="{!$Resource.completed_checkpoint}" style="width:30px"/>
+                                                                        <aura:set attribute="else">
+                                                                            <img src="{!$Resource.checkpoint_icon}" style="width:30px;"/>
+                                                                        </aura:set>
+                                                                    </aura:if>
+                                                                </aura:set> 
+                                                            </aura:if>
+                                                        </c:strike_popover>
+                                                    </div>         
+                                                </lightning:layoutItem>
+                                            </aura:if>
+                                            <lightning:layoutItem flexibility="auto" class="noPadding">
+                                                <aura:if isTrue="{!menteeAssignment.milestoneComplete == true}">
+                                                    <img src="{!$Resource.checkpoint_paths+'/4-Checkpoints/'+(index+1)+'.png'}" />
+                                                    <aura:set attribute="else">
+                                                        <img src="{!$Resource.checkpoint_paths+'/4-Checkpoints/'+(index+1)+'a.png'}"/>
+                                                    </aura:set>
+                                                </aura:if>
+                                            </lightning:layoutItem>
+                                            <lightning:layoutItem flexibility="auto" class="noPadding">
+                                                <div style="{!'cursor:pointer;position:absolute;'+(index == 0?'margin-top:-10px':(index == 1?'margin-top:65px':(index == 2?'margin-top:5px':'margin-top:-10px')))}">
+                                                    <c:strike_popover
+                                                                      variant="base"
+                                                                      placement="auto right"
+                                                                      theme="info"
+                                                                      withClose="false">
+                                                        <aura:set attribute="header">
+                                                            {!menteeAssignment.milestoneName}
+                                                        </aura:set>
+                                                        <aura:set attribute="popoverBody">
+                                                        </aura:set>
+                                                        <aura:if isTrue="{!v.currentMilestonePos == index+1}">
+                                                            <img src="{!$Resource.Selected_Astro}" id="{!menteeAssignment.milestoneName+'~'+index}" onclick="{!c.onClickCheckpoint}" style="width:60px;"/>
+                                                            <aura:set attribute="else">
+                                                                <aura:if isTrue="{!lessthan(index,v.currentMilestonePos)}">
+                                                                    <img src="{!$Resource.completed_checkpoint}" id="{!menteeAssignment.milestoneName+'~'+index}" onclick="{!c.onClickCheckpoint}" style="width:30px;"/>
+                                                                    <aura:set attribute="else">
+                                                                        <img src="{!$Resource.checkpoint_icon}" id="{!menteeAssignment.milestoneName+'~'+index}" onclick="{!c.onClickCheckpoint}" style="width:30px;"/>
+                                                                    </aura:set>
+                                                                </aura:if>
+                                                            </aura:set> 
+                                                        </aura:if>
+                                                    </c:strike_popover>
+                                                </div>         
+                                            </lightning:layoutItem>
+                                        </aura:iteration>
+                                    </lightning:layout>
+                                </div>
+                                <aura:set attribute="else">
+                                    <aura:if isTrue="{!v.noOfMilestones == 5}">
+                                        <div class="c-container">
+                                            <lightning:layout>
+                                                <aura:iteration items="{!v.menteeAssignmentInformation}" var="menteeAssignment" indexVar="index">
+                                                    <aura:if isTrue="{!index == 0}">
+                                                        <lightning:layoutItem flexibility="auto" class="noPadding">
+                                                            <div style="cursor:pointer;position:absolute;margin-top: 130px;">
+                                                                <c:strike_popover
+                                                                                  variant="base"
+                                                                                  placement="auto right"
+                                                                                  theme="info"
+                                                                                  withClose="false">
+                                                                    <aura:set attribute="header">
+                                                                        Start Point
+                                                                    </aura:set>
+                                                                    <aura:set attribute="popoverBody">
+                                                                    </aura:set>
+                                                                    <aura:if isTrue="{!v.currentMilestonePos == index}">
+                                                                        <img src="{!$Resource.Selected_Astro}" style="width:60px;"/>
+                                                                        <aura:set attribute="else">
+                                                                            <aura:if isTrue="{!lessthan(index,v.currentMilestonePos)}">
+                                                                                <img src="{!$Resource.completed_checkpoint}" style="width:30px"/>
+                                                                                <aura:set attribute="else">
+                                                                                    <img src="{!$Resource.checkpoint_icon}" style="width:30px;"/>
+                                                                                </aura:set>
+                                                                            </aura:if>
+                                                                        </aura:set> 
+                                                                    </aura:if>
+                                                                </c:strike_popover>
+                                                            </div>         
+                                                        </lightning:layoutItem>
+                                                    </aura:if>
+                                                    <lightning:layoutItem flexibility="auto" class="noPadding">
+                                                        <aura:if isTrue="{!menteeAssignment.milestoneComplete == true}">
+                                                            <img src="{!$Resource.checkpoint_paths +'/5-checkpoints/'+(index+1)+'.png'}" style="height:150px;"/>
+                                                            <aura:set attribute="else">
+                                                                <img src="{!$Resource.checkpoint_paths+'/5-checkpoints/'+(index+1)+'a.png'}" style="height:150px;"/>
+                                                            </aura:set>
+                                                        </aura:if>
+                                                    </lightning:layoutItem>
+                                                    <lightning:layoutItem flexibility="auto" class="noPadding">
+                                                        <div style="{!'cursor:pointer;position:absolute;'+(index == 0?'margin-top:30px':(index == 1?'margin-top:30px':(index == 2?'margin-top:95px':(index == 3?'margin-top:70px':''))))}">
+                                                            <c:strike_popover
+                                                                              variant="base"
+                                                                              placement="auto right"
+                                                                              theme="info"
+                                                                              withClose="false">
+                                                                <aura:set attribute="header">
+                                                                    {!menteeAssignment.milestoneName}
+                                                                </aura:set>
+                                                                <aura:set attribute="popoverBody">
+                                                                </aura:set>
+                                                                <aura:if isTrue="{!v.currentMilestonePos == index+1}">
+                                                                    <img src="{!$Resource.Selected_Astro}" id="{!menteeAssignment.milestoneName+'~'+index}" onclick="{!c.onClickCheckpoint}" style="width:60px;"/>
+                                                                    <aura:set attribute="else">
+                                                                        <aura:if isTrue="{!lessthan(index,v.currentMilestonePos)}">
+                                                                            <img src="{!$Resource.completed_checkpoint}" id="{!menteeAssignment.milestoneName+'~'+index}" onclick="{!c.onClickCheckpoint}" style="width:30px;"/>
+                                                                            <aura:set attribute="else">
+                                                                                <img src="{!$Resource.checkpoint_icon}" id="{!menteeAssignment.milestoneName+'~'+index}" onclick="{!c.onClickCheckpoint}" style="width:30px;"/>
+                                                                            </aura:set>
+                                                                        </aura:if>
+                                                                    </aura:set> 
+                                                                </aura:if>
+                                                            </c:strike_popover>
+                                                        </div>         
+                                                    </lightning:layoutItem>
+                                                </aura:iteration>
+                                            </lightning:layout>
+                                        </div>                                        
+                                    </aura:if>
+                                </aura:set>
+                            </aura:if>
+                        </aura:set>
+                    </aura:if>
+                </aura:set>
+            </aura:if>
+        </aura:set>
+    </aura:if>
+    
+</aura:component>

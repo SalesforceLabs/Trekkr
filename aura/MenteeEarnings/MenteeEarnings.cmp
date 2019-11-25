@@ -1,0 +1,48 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global">
+    <aura:attribute name="noOfMedals" type="Integer"/>
+    <aura:attribute name="noOfEnergizers" type="Integer"/>
+    <aura:attribute name="showMedals" type="Boolean" default="true"/>
+    <aura:attribute name="showEnergizers" type="Boolean" default="true"/>
+    <aura:attribute name="medalsBorder" type="String" default="border-bottom:1px solid #dddbda;"/>
+    <aura:attribute name="energizersBorder" type="String" default="border-left:1px solid #dddbda;border-bottom:1px solid #dddbda;border-right:1px solid #dddbda;"/>
+    
+    <div style="text-align:right;width:100%;">
+        <div class="slds-clearfix">
+            <aura:if isTrue="{!v.showMedals}">
+                <div class="slds-float_right" style="{!'padding:10px;'+v.medalsBorder}">
+                    <div class="slds-clearfix slds-align_absolute-center">
+                        <div class="slds-float_left">
+                            <img src="{!$Resource.medal}" style="height:35px;"/>
+                        </div>
+                        <div class="slds-float_right">
+                            <aura:if isTrue="{!v.noOfMedals}">
+                                <div class="slds-text-heading_medium slds-m-left_small" style="font-weight:bold;">{!v.noOfMedals}</div>
+                                <aura:set attribute="else">
+                                    <div class="slds-text-heading_medium slds-m-left_small" style="font-weight:bold;">0</div>
+                                </aura:set>
+                            </aura:if>
+                        </div>
+                    </div>
+                </div>
+            </aura:if>
+            <aura:if isTrue="{!v.showEnergizers}">
+                <div class="slds-float_right" style="{!'padding:10px;'+v.energizersBorder}">
+                    <div class="slds-clearfix slds-align_absolute-center">
+                        <div class="slds-float_left">
+                            <img src="{!$Resource.energizer}" style="height:35px;"/>
+                        </div>
+                        <div class="slds-float_right">
+                            <aura:if isTrue="{!v.noOfEnergizers}">
+                                <div class="slds-text-heading_medium slds-m-left_small" style="font-weight:bold;">{!v.noOfEnergizers}</div>
+                                <aura:set attribute="else">
+                                    <div class="slds-text-heading_medium slds-m-left_small" style="font-weight:bold;">0</div>
+                                </aura:set>
+                            </aura:if>
+                        </div>
+                    </div>
+                </div>
+            </aura:if>
+        </div>
+    </div>
+    
+</aura:component>

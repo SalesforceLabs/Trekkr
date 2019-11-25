@@ -1,0 +1,39 @@
+<aura:component implements="flexipage:availableForAllPageTypes" access="global" controller="NewOnboardingAdminsCntr">
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:attribute name="adminsCustomLookupCount" type="Integer" default="0"/>
+    <aura:attribute name="adminsCustomLookup" type="List"/>
+    <aura:attribute name="clearMultipicklist" type="Boolean" default="false"/>
+    <aura:attribute name="selectedUsers" type="String" default=""/>
+    <aura:attribute name="users" type="List"/>    
+    <aura:attribute name="ConfirmationDialogMessage" type="String"/>
+    <aura:attribute name="showConfirmationDialog" type="Boolean" default="false"/>
+    
+    <lightning:card>
+        <aura:set attribute="title">
+            <lightning:icon iconName="action:user" size="small"/>
+            Add Trekkr Admins
+        </aura:set>
+        <aura:set attribute="footer">
+            <button disabled="{!or(v.selectedUsers == '',v.selectedUsers == null)}" class="slds-button slds-button_success" 
+                    onclick="{!c.assignAdminRoleToUsers}">Assign Admin Role</button>
+        </aura:set>
+        <div class="slds-p-around_small">
+            <c:strike_multiSelectPicklist 
+                                          clear="{!v.clearMultipicklist}"
+                                          value="{!v.selectedUsers}"
+                                          label="Select Users"
+                                          errorMessage="Invalid input">
+                <aura:iteration items="{!v.users}" var="user">
+                    <c:strike_option label="{!user.FirstName+' '+user.LastName}" value="{!user.Id}" />
+                </aura:iteration>
+            </c:strike_multiSelectPicklist>
+        </div>
+    </lightning:card>
+    <aura:if isTrue="{!v.showConfirmationDialog}">
+        <c:ConfirmationDialog 
+                              messageBody="{!v.ConfirmationDialogMessage}"
+                              onClickCancel="{!c.onClickCancel_ConfirmationDialog}"
+                              onClickConfirm="{!c.onClickConfirm_ConfirmationDialog}"/>
+    </aura:if>
+</aura:component>

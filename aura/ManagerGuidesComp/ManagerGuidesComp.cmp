@@ -1,0 +1,103 @@
+<aura:component controller="ManagerGuidesCntr" implements="flexipage:availableForAllPageTypes,force:appHostable,forceCommunity:availableForAllPageTypes" access="global" >
+    
+    <aura:attribute name="page" type="String" default="YOURMENTORS"/>
+    <aura:attribute name="menteesList" type="List"/>
+    <aura:attribute name="mentorsList" type="List"/>
+    <aura:attribute name="mentorsMenteesMap" type="Map"/>
+    <aura:attribute name="selectedMentee" type="User"/>
+    <aura:attribute name="selectedMentor" type="User"/>
+    <aura:attribute name="currentMilestonePos" type="Integer"/>
+    <aura:attribute name="menteeAssignmentInformation" type="List"/>
+    <aura:attribute name="taskListsComponentDiv" type="List"/>
+    <aura:attribute name="selectedMilestoneName" type="String"/>
+    <aura:attribute name="selectedMilestonePrograms" type="List"/>
+    <aura:attribute name="milestoneInformationBody" type="List" default="[]"/>
+    <aura:attribute name="milestonInformationCompCount" type="Integer" default="0"/>
+    <ltng:require 
+                  styles="{!$Resource.IntroJs+'/introjs.css'}" 
+                  scripts="{!$Resource.IntroJs+'/intro.js'}" 
+                  afterScriptsLoaded="{!c.doInit}" 
+                  />
+    <div class="slds-card " style="text-align:center;min-height:400px;padding:10px;">
+        <a class="btn btn-large btn-success" href="javascript:void(0);" onclick="{!c.onclickTour}" style="display:none;">Show me how</a>
+        <aura:if isTrue="{!v.page != 'YOURMENTORS'}">
+            <table>
+                <tr >
+                    <td style="width:5%;text-align:center;">
+                        <img src="{!$Resource.arrow_left}" style="width:30px;cursor:pointer" onclick="{!c.onClickPrevious}"/>
+                    </td>
+                    <td style="width:95%;text-align:center;">
+                        <aura:if isTrue="{!v.page == 'YOURBUDDIES'}">
+                            <div class="slds-text-heading_large" style="margin-top:20px;margin-bottom:10px">{!v.selectedMentor.FirstName+' '+v.selectedMentor.LastName+'\'s Explorers'}</div>
+                        	<aura:set attribute="else">
+                            	<div class="slds-text-heading_large" style="margin-top:20px;margin-bottom:10px">{!v.selectedMentee.FirstName+' '+v.selectedMentee.LastName+'\'s Onboarding'}</div>
+                            </aura:set>
+                        </aura:if>
+                    </td>
+                </tr>  
+            </table>
+            <hr style="padding:0px;margin:0px;"/>
+        </aura:if>
+        <aura:if isTrue="{!v.page == 'PROFILE_INFORMATION'}">
+            <c:MenteeEarnings noOfEnergizers="{!v.selectedMentee.Energizers__c}" 
+                              noOfMedals="{!v.selectedMentee.Medals__c}"/>
+        </aura:if>
+        <aura:if isTrue="{!v.page== 'YOURMENTORS'}">
+            <div style="margin-top:30px">
+                <c:MyMentees buttonLabel="View Explorers" menteesList="{!v.mentorsList}" selectedMentee="{!v.selectedMentor}" onClickViewProfile="{!c.onClickMentor}"/>
+            </div>
+        </aura:if>
+        <aura:if isTrue="{!v.page== 'YOURBUDDIES'}">
+            <div style="margin-top:30px">
+                <c:MyMentees menteesList="{!v.menteesList}" selectedMentee="{!v.selectedMentee}" onClickViewProfile="{!c.onClickMentee}"/>
+            </div>
+        </aura:if>
+        <aura:if isTrue="{!v.page== 'PROFILE_INFORMATION'}">
+            <div>
+                <table style="height:100%">
+                    <tr style="height:100%">
+                        <td style="text-align:center;">
+                            <lightning:layout>
+                                <lightning:layoutItem flexibility="no-shrink" padding="around-large">
+                                    <div>
+                                        <div>
+                                            <lightning:helptext content="Click on the milestones to view progress"/>
+                                            <aura:if isTrue="{!and(v.selectedMentee.FullPhotoUrl!=null,v.selectedMentee.FullPhotoUrl!='')}">
+                                                <img src="{!v.selectedMentee.FullPhotoUrl}" class="circle" />
+                                                <aura:set attribute="else">
+                                                    <img src="{!$Resource.lightning_blue_profile_avatar}" class="circle" />
+                                                </aura:set>
+                                            </aura:if>
+                                        </div>
+                                        <div class="slds-text-heading_small" style="margin-top:4px;">{!v.selectedMentee.FirstName+' '+v.selectedMentee.LastName}</div>
+                                        <aura:iteration items="{!v.selectedMentee.User_User_Role_Junctions__r}" var="userRoleJunction">
+                                            <div class="slds-text-body_regular" style="margin-bottom:10px;">{!userRoleJunction.User_Role__r.Name}</div>
+                                        </aura:iteration>
+                                        <button id="{!rowNo}" class="slds-button slds-button_brand" onclick="{!c.nextScreen}" >Assign Trail(s)</button>
+                                    </div>
+                                </lightning:layoutItem>
+                                <lightning:layoutItem flexibility="auto" padding="around-medium">
+                                    <c:MenteeProgressPath aura:id="menteeProgressPathCmp" onClickMilestone="{!c.onClickMilestone}" currentMilestonePos="{!v.currentMilestonePos}" menteeAssignmentInformation="{!v.menteeAssignmentInformation}"/>
+                                </lightning:layoutItem>
+                            </lightning:layout>
+                        </td>
+                    </tr>
+                </table>
+                <div style="margin-top:30px;">
+                    {!v.milestoneInformationBody}
+                </div>
+            </div>
+        </aura:if> 
+        <aura:if isTrue="{!v.page== 'ASSIGNPROGRAMS'}">
+            <div style="margin-top:20px;">
+                <c:AssignPrograms  currentMilestonePos="{!v.currentMilestonePos}" aura:id="assignProgramComp" onClickNewProgram="{!c.nextScreen}" menteeDetail="{!v.selectedMentee}" onDataChange="{!c.updateOnDataChange}"/>
+            </div>
+        </aura:if>  
+        <aura:if isTrue="{!v.page== 'NEWPROGRAM'}">
+            <div style="text-align:left;">
+                <c:NewOnboardingProgram onDataChange="{!c.updateOnDataChange}" currentMilestonePos="{!v.currentMilestonePos}" assignToUserId="{!v.selectedMentee.Id}" advanced="true" aura:id="newOnboardingProgramLC" onProgramCreated="{!c.onNewProgramCreated}"/>
+            </div>
+        </aura:if> 
+    </div>
+    <lightning:spinner alternativeText="Loading" aura:id="ltngSpiner" size="medium" class="slds-hide"/>
+</aura:component>

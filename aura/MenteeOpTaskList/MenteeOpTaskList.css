@@ -1,0 +1,32 @@
+.THIS .slds-card__body{
+    padding: 10px !important;
+}
+.THIS .hr-style{
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+/*.THIS .task-table{
+    padding: 0 15px 0 15px!important; 
+}*/
+.THIS .slds-text-heading_large{
+    font-weight: 500;
+    font-size: 1rem;
+    line-height: 1.25;
+    margin-left: 1%;
+}
+.THIS a {
+    text-decoration: none;
+    transition: color .1s linear;
+    /*padding: 5%;*/
+}
+.THIS .slds-form-element_readonly {
+    border-bottom: transparent !important; 
+}
+.THIS .width-set-listItem{
+    width: 95% !important;
+	padding-left: 1% !important;
+}
+.THIS .width-set-listIcon{
+    max-width: 5% !important;
+    cursor: pointer;
+}
